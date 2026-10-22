@@ -1,0 +1,907 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1">
+  <title>Admin — Danni & Riska Wedding</title>
+  <style>
+    :root {
+      --gold: #a6814d;
+      --dark: #332c29;
+      --cream: #f8f4ee;
+      --line: #e8e1d8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--cream);
+      color: var(--dark);
+      font: 14px Arial, sans-serif;
+    }
+    header {
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      margin: 0;
+      color: var(--gold);
+      font-family: Georgia, serif;
+      font-size: 32px;
+    }
+    h2 { margin-top: 0; }
+    main {
+      max-width: 1200px;
+      margin: 24px auto;
+      padding: 0 16px;
+    }
+    .card {
+      background: white;
+      padding: 22px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      margin-bottom: 18px;
+    }
+    .login { max-width: 420px; margin: 45px auto; }
+    input, select, button {
+      font: inherit;
+      padding: 11px;
+      border: 1px solid #d5cbbf;
+      border-radius: 8px;
+    }
+    input, select { width: 100%; }
+    button {
+      background: var(--gold);
+      color: white;
+      border: 0;
+      cursor: pointer;
+    }
+    button:hover { filter: brightness(.93); }
+    button:disabled { opacity: .5; cursor: wait; }
+    .secondary { background: #655b55; }
+    .danger { background: #a73d3d; }
+    .success { background: #24834b; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    .stat {
+      padding: 18px;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+    .stat strong {
+      display: block;
+      font-size: 26px;
+      margin-bottom: 6px;
+    }
+    .formgrid {
+      display: grid;
+      grid-template-columns: 2fr 2fr 1fr 1fr;
+      gap: 10px;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+      margin: 12px 0 6px;
+    }
+    .actions {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+    .actions button { padding: 8px; }
+    .tablewrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 850px;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 11px 8px;
+      text-align: left;
+    }
+    th { background: #f9f5ef; }
+    .muted { color: #746c66; }
+    .hidden { display: none !important; }
+    .notice {
+      white-space: pre-wrap;
+      margin: 12px 0;
+      padding: 12px;
+      background: #f2ede5;
+      border-radius: 8px;
+    }
+    .error { background: #ffe9e9; color: #922; }
+    .ok { background: #e8f6ec; color: #185e32; }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    small { line-height: 1.5; }
+    @media(max-width: 850px) {
+      .grid { grid-template-columns: repeat(2, 1fr); }
+      .formgrid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Danni & Riska</h1>
+  <p>Wedding Guest Manager — 22 November 2026</p>
+</header>
+
+<main>
+  <div id="message" class="notice hidden"></div>
+
+  <section id="loginPanel" class="card login">
+    <h2>Login Administrator</h2>
+    <p class="muted">Masuk menggunakan akun Supabase.</p>
+    <form id="loginForm">
+      <label for="email">Email</label>
+      <input id="email" type="email" required
+             autocomplete="username">
+
+      <label for="password">Password</label>
+      <input id="password" type="password" required
+             autocomplete="current-password">
+
+      <p><button type="submit">Masuk Dashboard</button></p>
+    </form>
+  </section>
+
+  <section id="dashboard" class="hidden">
+    <div class="card topbar">
+      <div>
+        <strong>Dashboard Administrator</strong>
+        <p id="adminEmail" class="muted"></p>
+      </div>
+      <button id="logoutBtn" class="secondary">Logout</button>
+    </div>
+
+    <div class="grid">
+      <div class="stat">
+        <strong id="totalGuests">0</strong>
+        Undangan
+      </div>
+      <div class="stat">
+        <strong id="totalQuota">0</strong>
+        Total kuota
+      </div>
+      <div class="stat">
+        <strong id="totalPresent">0</strong>
+        RSVP hadir
+      </div>
+      <div class="stat">
+        <strong id="totalCheckins">0</strong>
+        Check-in
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Tambah / Edit Tamu</h2>
+      <form id="guestForm">
+        <div class="formgrid">
+          <div>
+            <label>Nama undangan</label>
+            <input id="guestName" required maxlength="200">
+          </div>
+          <div>
+            <label>Nomor WhatsApp</label>
+            <input id="guestPhone"
+                   placeholder="6281234567890">
+          </div>
+          <div>
+            <label>Kuota</label>
+            <input id="guestQuota" type="number"
+                   min="1" max="20" value="1" required>
+          </div>
+          <div>
+            <label>&nbsp;</label>
+            <button type="submit" id="saveGuestBtn">
+              Simpan Tamu
+            </button>
+          </div>
+        </div>
+        <p>
+          <button type="button" class="secondary"
+                  id="cancelEditBtn">
+            Batalkan Edit
+          </button>
+        </p>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Impor Tamu dari CSV</h2>
+      <p class="muted">
+        Format kolom: name,phone,quota,category
+      </p>
+      <input type="file" id="csvFile" accept=".csv,text/csv">
+      <p id="csvSummary" class="muted">
+        Belum ada file dipilih.
+      </p>
+      <div class="actions">
+        <button id="importBtn" disabled>
+          Impor Data Valid
+        </button>
+        <button id="downloadTemplateBtn" class="secondary">
+          Unduh Contoh CSV
+        </button>
+      </div>
+      <p class="muted">
+        Nama dan nomor yang sudah terdaftar akan dilewati.
+        Periksa pratinjau sebelum mengimpor.
+      </p>
+      <div class="tablewrap">
+        <table id="previewTable" class="hidden">
+          <thead>
+            <tr>
+              <th>Baris</th><th>Nama</th><th>WhatsApp</th>
+              <th>Kuota</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="previewBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="topbar">
+        <h2>Daftar Undangan</h2>
+        <button id="refreshBtn" class="secondary">
+          Refresh
+        </button>
+      </div>
+      <input id="searchGuest"
+             placeholder="Cari nama atau WhatsApp...">
+      <p id="guestCount" class="muted"></p>
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nama</th><th>WhatsApp</th>
+              <th>Kuota</th><th>RSVP</th>
+              <th>Link & Tindakan</th>
+            </tr>
+          </thead>
+          <tbody id="guestBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAMBAHAN: Moderasi Ucapan & Doa (admin saja) -->
+    <div class="card" id="wishesAdminPanel">
+      <div class="topbar">
+        <h2>Kelola Ucapan &amp; Doa</h2>
+        <button id="refreshWishesBtn" type="button" class="secondary">Refresh Ucapan</button>
+      </div>
+      <p id="wishesAdminStatus" class="muted" role="status">Memuat ucapan...</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Pengirim</th><th>Ucapan &amp; Doa</th><th>Status</th><th>Tanggal</th><th>Tindakan</th></tr></thead>
+          <tbody id="wishesAdminBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script type="module">
+  import {
+    createClient
+  } from "https://esm.sh/@supabase/supabase-js@2";
+
+  // KONFIGURASI — GANTI PUBLISHABLE KEY DI BAWAH.
+  // Pastikan URL sesuai Project URL Supabase Anda.
+  const SUPABASE_URL =
+    "https://itaphjltcgsrayxyzdoe.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable_0xY4VXW6NB7CJKU1K6-lfw_Srq7bx0m";
+
+  const INVITATION_URL =
+    "https://dgunawan0924-rgb.github.io/undangan-wedding/";
+
+  const configured =
+    SUPABASE_KEY.startsWith("sb_publishable_") &&
+    !SUPABASE_KEY.includes("ISI_");
+
+  const $ = id => document.getElementById(id);
+  let db;
+  let guests = [];
+  let rsvps = [];
+  let checkins = [];
+  let editingId = null;
+  let csvRows = [];
+
+  function notify(text, error = false) {
+    const el = $("message");
+    el.textContent = text;
+    el.className = "notice " + (error ? "error" : "ok");
+    window.scrollTo({top: 0, behavior: "smooth"});
+  }
+
+  function clearMessage() {
+    $("message").className = "notice hidden";
+  }
+
+  function normalizePhone(value) {
+    let p = String(value || "").replace(/[^\d]/g, "");
+    if (p.startsWith("0")) p = "62" + p.slice(1);
+    else if (p.startsWith("8")) p = "62" + p;
+    return p;
+  }
+
+  function validPhone(p) {
+    return !p || /^62\d{8,13}$/.test(p);
+  }
+
+  function makeLink(guest) {
+    const url = new URL(INVITATION_URL);
+    url.searchParams.set("invite", guest.invitation_token);
+    return url.toString();
+  }
+
+  function whatsappMessage(guest) {
+    return `UNDANGAN PERNIKAHAN
+Danni & Riska
+
+Salam sejahtera,
+
+Dengan penuh rasa syukur, kami mengundang ${guest.name} untuk hadir dan berbagi sukacita dalam pernikahan kami.
+
+Minggu, 22 November 2026
+
+Pemberkatan
+Pukul 10.00 WIB
+Gereja Masehi Advent Hari Ketujuh - Rawamangun, Jakarta Timur
+
+Resepsi
+Pukul 12.00 WIB
+Gedung Maranatha - Rawamangun, Jakarta Timur
+
+Undangan lengkap dapat dilihat melalui tautan berikut:
+${makeLink(guest)}
+
+Kehadiran dan doa restu Anda akan menjadi kebahagiaan tersendiri bagi kami saat memulai babak baru dalam kehidupan bersama.
+
+Tuhan memberkati,
+Danni & Riska`;
+  }
+
+  function button(text, className, handler) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = text;
+    if (className) b.className = className;
+    b.addEventListener("click", handler);
+    return b;
+  }
+
+  function td(text) {
+    const el = document.createElement("td");
+    el.textContent = String(text ?? "");
+    return el;
+  }
+
+  async function verifyAdmin() {
+    const {data, error} = await db.rpc("is_wedding_admin");
+    if (error) throw error;
+    return data === true;
+  }
+
+  async function showDashboard() {
+    const {data: {user}, error} = await db.auth.getUser();
+    if (error || !user) {
+      $("loginPanel").classList.remove("hidden");
+      $("dashboard").classList.add("hidden");
+      return;
+    }
+
+    if (!(await verifyAdmin())) {
+      await db.auth.signOut();
+      $("loginPanel").classList.remove("hidden");
+      $("dashboard").classList.add("hidden");
+      notify("Akun ini bukan administrator.", true);
+      return;
+    }
+
+    $("adminEmail").textContent = user.email || "";
+    $("loginPanel").classList.add("hidden");
+    $("dashboard").classList.remove("hidden");
+    await loadData();
+    await loadWishesAdmin();
+  }
+
+  async function fetchAll(table, columns) {
+    let all = [];
+    let from = 0;
+    const pageSize = 500;
+
+    while (true) {
+      const {data, error} = await db
+        .from(table)
+        .select(columns)
+        .range(from, from + pageSize - 1);
+
+      if (error) throw error;
+      all.push(...data);
+
+      if (data.length < pageSize) break;
+      from += pageSize;
+    }
+    return all;
+  }
+
+  async function loadData() {
+    try {
+      const [g, r, c] = await Promise.all([
+        fetchAll("guests",
+          "id,name,phone,quota,invitation_token,created_at"),
+        fetchAll("rsvps",
+          "guest_id,status,guest_count"),
+        fetchAll("checkins",
+          "guest_id,actual_count")
+      ]);
+
+      guests = g.sort((a, b) =>
+        a.name.localeCompare(b.name, "id"));
+      rsvps = r;
+      checkins = c;
+
+      $("totalGuests").textContent = guests.length;
+      $("totalQuota").textContent =
+        guests.reduce((n, g) => n + g.quota, 0);
+      $("totalPresent").textContent =
+        rsvps.filter(r => r.status === "hadir")
+             .reduce((n, r) => n + (r.guest_count || 0), 0);
+      $("totalCheckins").textContent =
+        checkins.reduce((n, c) => n + (c.actual_count || 0), 0);
+
+      renderGuests();
+    } catch (e) {
+      notify("Gagal mengambil data: " + e.message, true);
+    }
+  }
+
+  function renderGuests() {
+    const q = $("searchGuest").value.toLowerCase().trim();
+    const list = guests.filter(g =>
+      g.name.toLowerCase().includes(q) ||
+      (g.phone || "").includes(q));
+
+    $("guestCount").textContent =
+      `${list.length} dari ${guests.length} undangan`;
+
+    const body = $("guestBody");
+    body.replaceChildren();
+
+    for (const g of list) {
+      const row = document.createElement("tr");
+      const rsvp = rsvps.find(r => r.guest_id === g.id);
+
+      row.append(
+        td(g.name),
+        td(g.phone || "-"),
+        td(g.quota),
+        td(rsvp?.status || "Belum RSVP")
+      );
+
+      const actions = document.createElement("td");
+      const wrap = document.createElement("div");
+      wrap.className = "actions";
+
+      wrap.append(button("Salin Link", "secondary",
+        async () => {
+          try {
+            await navigator.clipboard.writeText(makeLink(g));
+            notify("Link disalin untuk " + g.name);
+          } catch {
+            notify("Gagal menyalin. Gunakan HTTPS.", true);
+          }
+        }));
+
+      wrap.append(button("WhatsApp", "success", () => {
+        const p = normalizePhone(g.phone);
+        if (!p || !validPhone(p)) {
+          notify("Nomor WhatsApp tidak valid: " + g.name, true);
+          return;
+        }
+        const url = "https://wa.me/" + p +
+          "?text=" + encodeURIComponent(whatsappMessage(g));
+        window.open(url, "_blank", "noopener,noreferrer");
+      }));
+
+      wrap.append(button("Edit", "secondary", () => {
+        editingId = g.id;
+        $("guestName").value = g.name;
+        $("guestPhone").value = g.phone || "";
+        $("guestQuota").value = g.quota;
+        $("saveGuestBtn").textContent = "Simpan Perubahan";
+        $("guestName").focus();
+      }));
+
+      wrap.append(button("Hapus", "danger", async () => {
+        if (!confirm("Hapus undangan untuk " + g.name +
+          "? Data RSVP terkait juga dapat terhapus.")) return;
+
+        const {error} = await db.from("guests")
+          .delete().eq("id", g.id);
+
+        if (error) notify(error.message, true);
+        else {
+          notify("Tamu berhasil dihapus.");
+          await loadData();
+        }
+      }));
+
+      actions.append(wrap);
+      row.append(actions);
+      body.append(row);
+    }
+  }
+
+  function resetGuestForm() {
+    editingId = null;
+    $("guestForm").reset();
+    $("guestQuota").value = 1;
+    $("saveGuestBtn").textContent = "Simpan Tamu";
+  }
+
+  $("loginForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    clearMessage();
+    const btn = e.submitter;
+    btn.disabled = true;
+
+    try {
+      const {error} = await db.auth.signInWithPassword({
+        email: $("email").value.trim(),
+        password: $("password").value
+      });
+      if (error) throw error;
+      $("password").value = "";
+      await showDashboard();
+    } catch (err) {
+      notify("Login gagal: " + err.message, true);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  $("logoutBtn").addEventListener("click", async () => {
+    await db.auth.signOut();
+    guests = [];
+    rsvps = [];
+    checkins = [];
+    $("dashboard").classList.add("hidden");
+    $("loginPanel").classList.remove("hidden");
+    notify("Anda sudah logout.");
+  });
+
+  $("guestForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const name = $("guestName").value.trim();
+    const phone = normalizePhone($("guestPhone").value);
+    const quota = Number($("guestQuota").value);
+
+    if (!name || name.length > 200 ||
+        !validPhone(phone) ||
+        !Number.isInteger(quota) ||
+        quota < 1 || quota > 20) {
+      notify("Periksa nama, nomor WhatsApp, dan kuota.", true);
+      return;
+    }
+
+    const duplicate = guests.find(g =>
+      g.id !== editingId &&
+      (g.name.trim().toLowerCase() === name.toLowerCase() ||
+       (phone && normalizePhone(g.phone) === phone)));
+
+    if (duplicate) {
+      notify("Nama atau nomor sudah terdaftar: " +
+        duplicate.name, true);
+      return;
+    }
+
+    const payload = {name, phone: phone || null, quota};
+    const query = editingId
+      ? db.from("guests").update(payload).eq("id", editingId)
+      : db.from("guests").insert(payload);
+
+    const {error} = await query;
+    if (error) {
+      notify(error.message, true);
+      return;
+    }
+
+    resetGuestForm();
+    notify("Data tamu berhasil disimpan.");
+    await loadData();
+  });
+
+  $("cancelEditBtn").addEventListener("click", resetGuestForm);
+  $("refreshBtn").addEventListener("click", loadData);
+  $("searchGuest").addEventListener("input", renderGuests);
+
+  // Parser CSV mendukung tanda kutip dan koma di dalam teks.
+  function parseCSV(text) {
+    text = text.replace(/^\uFEFF/, "");
+    const rows = [];
+    let row = [], field = "", quoted = false;
+
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+
+      if (ch === '"') {
+        if (quoted && text[i + 1] === '"') {
+          field += '"';
+          i++;
+        } else {
+          quoted = !quoted;
+        }
+      } else if (ch === "," && !quoted) {
+        row.push(field);
+        field = "";
+      } else if ((ch === "\n" || ch === "\r") && !quoted) {
+        if (ch === "\r" && text[i + 1] === "\n") i++;
+        row.push(field);
+        if (row.some(v => v.trim())) rows.push(row);
+        row = [];
+        field = "";
+      } else {
+        field += ch;
+      }
+    }
+
+    if (quoted) throw Error("CSV memiliki tanda kutip tidak lengkap.");
+    row.push(field);
+    if (row.some(v => v.trim())) rows.push(row);
+    return rows;
+  }
+
+  $("csvFile").addEventListener("change", async e => {
+    csvRows = [];
+    $("importBtn").disabled = true;
+    $("previewTable").classList.add("hidden");
+
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      const rows = parseCSV(await file.text());
+      if (rows.length < 2) throw Error("CSV kosong.");
+
+      const headers = rows.shift().map(h =>
+        h.trim().toLowerCase());
+      const ix = name => headers.indexOf(name);
+
+      if (ix("name") < 0 || ix("quota") < 0) {
+        throw Error("Kolom name dan quota wajib tersedia.");
+      }
+
+      const seenNames = new Set(
+        guests.map(g => g.name.trim().toLowerCase()));
+      const seenPhones = new Set(
+        guests.map(g => normalizePhone(g.phone)).filter(Boolean));
+
+      csvRows = rows.map((r, i) => {
+        const name = (r[ix("name")] || "").trim();
+        const phone = normalizePhone(
+          ix("phone") >= 0 ? r[ix("phone")] : "");
+        const quota = Number(r[ix("quota")]);
+        let status = "Valid";
+
+        if (!name || name.length > 200 ||
+            !validPhone(phone) ||
+            !Number.isInteger(quota) ||
+            quota < 1 || quota > 20) {
+          status = "Tidak valid";
+        } else if (
+          seenNames.has(name.toLowerCase()) ||
+          (phone && seenPhones.has(phone))
+        ) {
+          status = "Duplikat";
+        } else {
+          seenNames.add(name.toLowerCase());
+          if (phone) seenPhones.add(phone);
+        }
+
+        return {
+          line: i + 2, name, phone, quota, status
+        };
+      });
+
+      const valid = csvRows.filter(r => r.status === "Valid");
+      const invalid = csvRows.length - valid.length;
+
+      $("csvSummary").textContent =
+        `${csvRows.length} baris: ${valid.length} valid, ` +
+        `${invalid} dilewati.`;
+
+      const body = $("previewBody");
+      body.replaceChildren();
+
+      for (const r of csvRows.slice(0, 100)) {
+        const tr = document.createElement("tr");
+        tr.append(
+          td(r.line), td(r.name), td(r.phone || "-"),
+          td(r.quota), td(r.status)
+        );
+        body.append(tr);
+      }
+
+      $("previewTable").classList.remove("hidden");
+      $("importBtn").disabled = valid.length === 0;
+    } catch (err) {
+      notify("CSV gagal dibaca: " + err.message, true);
+    }
+  });
+
+  $("importBtn").addEventListener("click", async () => {
+    const valid = csvRows.filter(r => r.status === "Valid");
+    if (!valid.length) return;
+
+    if (!confirm(`Impor ${valid.length} tamu ke database?`)) return;
+
+    const btn = $("importBtn");
+    btn.disabled = true;
+
+    let inserted = 0, failed = 0;
+    const errors = [];
+
+    // Batch kecil agar mudah menangani kegagalan.
+    for (let i = 0; i < valid.length; i += 50) {
+      const batch = valid.slice(i, i + 50).map(r => ({
+        name: r.name,
+        phone: r.phone || null,
+        quota: r.quota
+      }));
+
+      const {error} = await db.from("guests").insert(batch);
+      if (error) {
+        failed += batch.length;
+        errors.push(`Baris ${i + 1}: ${error.message}`);
+      } else {
+        inserted += batch.length;
+      }
+    }
+
+    csvRows = [];
+    $("csvFile").value = "";
+    $("previewTable").classList.add("hidden");
+    $("csvSummary").textContent = "Impor selesai.";
+    await loadData();
+
+    notify(
+      `Berhasil: ${inserted} tamu. Gagal: ${failed}.` +
+      (errors.length ? "\n" + errors.join("\n") : ""),
+      failed > 0
+    );
+  });
+
+  $("downloadTemplateBtn").addEventListener("click", () => {
+    const csv =
+      "name,phone,quota,category\n" +
+      "Tamu Contoh A,6281234567890,2,Keluarga\n" +
+      "Tamu Contoh B,6281312345678,1,Teman\n";
+
+    const blob = new Blob(["\uFEFF" + csv], {
+      type: "text/csv;charset=utf-8"
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "template_tamu.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+
+  // TAMBAHAN: Moderasi ucapan; akses database tetap mengikuti RLS administrator.
+  async function loadWishesAdmin() {
+    const body = $("wishesAdminBody");
+    const status = $("wishesAdminStatus");
+    body.replaceChildren();
+    status.textContent = "Memuat ucapan...";
+    try {
+      const wishes = await fetchAll("wishes", "id,sender_name,message,approved,created_at");
+      wishes.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      const pending = wishes.filter(w => w.approved !== true).length;
+      status.textContent = `${wishes.length} ucapan; ${pending} menunggu persetujuan.`;
+      if (!wishes.length) {
+        const row = document.createElement("tr");
+        const cell = td("Belum ada ucapan.");
+        cell.colSpan = 5;
+        row.append(cell);
+        body.append(row);
+      }
+      for (const wish of wishes) {
+        const row = document.createElement("tr");
+        const actionCell = document.createElement("td");
+        const actionWrap = document.createElement("div");
+        actionWrap.className = "actions";
+        const approve = button("Setujui", "success", () => setWishApproval(wish.id, true));
+        const hide = button("Sembunyikan", "secondary", () => setWishApproval(wish.id, false));
+        const remove = button("Hapus", "danger", () => deleteWishAdmin(wish.id, wish.sender_name));
+        approve.disabled = wish.approved === true;
+        hide.disabled = wish.approved !== true;
+        actionWrap.append(approve, hide, remove);
+        actionCell.append(actionWrap);
+        row.append(
+          td(wish.sender_name || "-"),
+          td(wish.message || "-"),
+          td(wish.approved === true ? "Disetujui" : "Menunggu"),
+          td(wish.created_at ? new Date(wish.created_at).toLocaleString("id-ID") : "-"),
+          actionCell
+        );
+        body.append(row);
+      }
+    } catch (err) {
+      status.textContent = "Gagal memuat ucapan: " + err.message;
+    }
+  }
+
+  async function setWishApproval(id, approved) {
+    const status = $("wishesAdminStatus");
+    try {
+      status.textContent = "Menyimpan perubahan...";
+      const {data, error} = await db.from("wishes")
+        .update({approved}).eq("id", id).select("id");
+      if (error) throw error;
+      if (!data || data.length !== 1) throw Error("Ucapan tidak ditemukan atau akses ditolak.");
+      await loadWishesAdmin();
+    } catch (err) {
+      status.textContent = "Gagal memperbarui ucapan: " + err.message;
+    }
+  }
+
+  async function deleteWishAdmin(id, senderName) {
+    if (!confirm(`Hapus ucapan dari ${senderName || "pengirim"} secara permanen?`)) return;
+    const status = $("wishesAdminStatus");
+    try {
+      status.textContent = "Menghapus ucapan...";
+      const {data, error} = await db.from("wishes")
+        .delete().eq("id", id).select("id");
+      if (error) throw error;
+      if (!data || data.length !== 1) throw Error("Ucapan tidak ditemukan atau akses ditolak.");
+      await loadWishesAdmin();
+    } catch (err) {
+      status.textContent = "Gagal menghapus ucapan: " + err.message;
+    }
+  }
+
+  $("refreshWishesBtn").addEventListener("click", loadWishesAdmin);
+
+  async function initialize() {
+    if (!configured) {
+      notify(
+        "Isi SUPABASE_KEY dengan Publishable Key dari Notes, " +
+        "lalu simpan file admin.html.",
+        true
+      );
+      return;
+    }
+
+    try {
+      db = createClient(SUPABASE_URL, SUPABASE_KEY);
+      await showDashboard();
+    } catch (err) {
+      notify("Gagal menghubungkan Supabase: " +
+        err.message, true);
+    }
+  }
+
+  initialize();
+</script>
+</body>
+</html>
