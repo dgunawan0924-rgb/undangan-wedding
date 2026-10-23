@@ -1,0 +1,2575 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1">
+  <title>Admin — Danni & Riska Wedding</title>
+  <style>
+    :root {
+      --gold: #a6814d;
+      --dark: #332c29;
+      --cream: #f8f4ee;
+      --line: #e8e1d8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--cream);
+      color: var(--dark);
+      font: 14px Arial, sans-serif;
+    }
+    header {
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      margin: 0;
+      color: var(--gold);
+      font-family: Georgia, serif;
+      font-size: 32px;
+    }
+    h2 { margin-top: 0; }
+    main {
+      max-width: 1200px;
+      margin: 24px auto;
+      padding: 0 16px;
+    }
+    .card {
+      background: white;
+      padding: 22px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      margin-bottom: 18px;
+    }
+    .login { max-width: 420px; margin: 45px auto; }
+    input, select, button {
+      font: inherit;
+      padding: 11px;
+      border: 1px solid #d5cbbf;
+      border-radius: 8px;
+    }
+    input, select { width: 100%; }
+    button {
+      background: var(--gold);
+      color: white;
+      border: 0;
+      cursor: pointer;
+    }
+    button:hover { filter: brightness(.93); }
+    button:disabled { opacity: .5; cursor: wait; }
+    .secondary { background: #655b55; }
+    .danger { background: #a73d3d; }
+    .success { background: #24834b; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    .stat {
+      padding: 18px;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+    .stat strong {
+      display: block;
+      font-size: 26px;
+      margin-bottom: 6px;
+    }
+    .formgrid {
+      display: grid;
+      grid-template-columns: 2fr 2fr 1fr 1fr;
+      gap: 10px;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+      margin: 12px 0 6px;
+    }
+    .actions {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+    .actions button { padding: 8px; }
+    .tablewrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 850px;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 11px 8px;
+      text-align: left;
+    }
+    th { background: #f9f5ef; }
+    .muted { color: #746c66; }
+    .hidden { display: none !important; }
+    .notice {
+      white-space: pre-wrap;
+      margin: 12px 0;
+      padding: 12px;
+      background: #f2ede5;
+      border-radius: 8px;
+    }
+    .error { background: #ffe9e9; color: #922; }
+    .ok { background: #e8f6ec; color: #185e32; }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    small { line-height: 1.5; }
+    #rsvpManagement .formgrid, #checkinManagement .formgrid { align-items: end; }
+    @media(max-width: 850px) {
+      #rsvpManagement .formgrid, #checkinManagement .formgrid { grid-template-columns: 1fr !important; }
+    }
+    @media(max-width: 850px) {
+      .grid { grid-template-columns: repeat(2, 1fr); }
+      .formgrid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Danni & Riska</h1>
+  <p>Wedding Guest Manager — 22 November 2026</p>
+</header>
+
+<main>
+  <div id="message" class="notice hidden"></div>
+
+  <section id="loginPanel" class="card login">
+    <h2>Login Administrator</h2>
+    <p class="muted">Masuk menggunakan akun Supabase.</p>
+    <form id="loginForm">
+      <label for="email">Email</label>
+      <input id="email" type="email" required
+             autocomplete="username">
+
+      <label for="password">Password</label>
+      <input id="password" type="password" required
+             autocomplete="current-password">
+
+      <p><button type="submit">Masuk Dashboard</button></p>
+    </form>
+  </section>
+
+  <section id="dashboard" class="hidden">
+    <div class="card topbar">
+      <div>
+        <strong>Dashboard Administrator</strong>
+        <p id="adminEmail" class="muted"></p>
+      </div>
+      <button id="logoutBtn" class="secondary">Logout</button>
+    </div>
+
+    <div class="grid">
+      <div class="stat">
+        <strong id="totalGuests">0</strong>
+        Undangan
+      </div>
+      <div class="stat">
+        <strong id="totalQuota">0</strong>
+        Total kuota
+      </div>
+      <div class="stat">
+        <strong id="totalPresent">0</strong>
+        RSVP hadir
+      </div>
+      <div class="stat">
+        <strong id="totalCheckins">0</strong>
+        Check-in
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Tambah / Edit Tamu</h2>
+      <form id="guestForm">
+        <div class="formgrid">
+          <div>
+            <label>Nama undangan</label>
+            <input id="guestName" required maxlength="200">
+          </div>
+          <div>
+            <label>Nomor WhatsApp</label>
+            <input id="guestPhone"
+                   placeholder="6281234567890">
+          </div>
+          <div>
+            <label>Kuota</label>
+            <input id="guestQuota" type="number"
+                   min="1" max="20" value="1" required>
+          </div>
+          <div>
+            <label>&nbsp;</label>
+            <button type="submit" id="saveGuestBtn">
+              Simpan Tamu
+            </button>
+          </div>
+        </div>
+        <p>
+          <button type="button" class="secondary"
+                  id="cancelEditBtn">
+            Batalkan Edit
+          </button>
+        </p>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Impor Tamu dari CSV</h2>
+      <p class="muted">
+        Format kolom: name,phone,quota,category
+      </p>
+      <input type="file" id="csvFile" accept=".csv,text/csv">
+      <p id="csvSummary" class="muted">
+        Belum ada file dipilih.
+      </p>
+      <div class="actions">
+        <button id="importBtn" disabled>
+          Impor Data Valid
+        </button>
+        <button id="downloadTemplateBtn" class="secondary">
+          Unduh Contoh CSV
+        </button>
+      </div>
+      <p class="muted">
+        Nama dan nomor yang sudah terdaftar akan dilewati.
+        Periksa pratinjau sebelum mengimpor.
+      </p>
+      <div class="tablewrap">
+        <table id="previewTable" class="hidden">
+          <thead>
+            <tr>
+              <th>Baris</th><th>Nama</th><th>WhatsApp</th>
+              <th>Kuota</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="previewBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="topbar">
+        <h2>Daftar Undangan</h2>
+        <button id="refreshBtn" class="secondary">
+          Refresh
+        </button>
+      </div>
+      <input id="searchGuest"
+             placeholder="Cari nama atau WhatsApp...">
+      <p id="guestCount" class="muted"></p>
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nama</th><th>WhatsApp</th>
+              <th>Kuota</th><th>RSVP</th>
+              <th>Link & Tindakan</th>
+            </tr>
+          </thead>
+          <tbody id="guestBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+
+    <!-- PENGEMBANGAN DASHBOARD: RSVP DAN CHECK-IN -->
+    <div class="card" id="rsvpManagement">
+      <div class="topbar"><h2>Manajemen RSVP</h2><button id="exportRsvpBtn" class="secondary" type="button">Ekspor RSVP CSV</button></div>
+      <p class="muted">Data konfirmasi tamu dari Supabase. Filter untuk melihat siapa yang hadir, tidak hadir, atau belum menjawab.</p>
+      <div class="formgrid" style="grid-template-columns:2fr 1fr 1fr 1fr">
+        <div><label for="rsvpSearch">Cari tamu</label><input id="rsvpSearch" placeholder="Nama atau WhatsApp"></div>
+        <div><label for="rsvpFilter">Status RSVP</label><select id="rsvpFilter"><option value="all">Semua</option><option value="hadir">Hadir</option><option value="tidak_hadir">Tidak hadir</option><option value="pending">Belum RSVP</option></select></div>
+        <div><label>&nbsp;</label><button type="button" id="refreshRsvpBtn" class="secondary">Refresh Data</button></div>
+      </div>
+      <p id="rsvpSummary" class="muted"></p>
+      <div class="tablewrap"><table><thead><tr><th>Nama</th><th>WhatsApp</th><th>Kuota</th><th>RSVP</th><th>Jumlah RSVP</th><th>Check-in</th></tr></thead><tbody id="rsvpBody"></tbody></table></div>
+    </div>
+
+    <div class="card" id="checkinManagement">
+      <div class="topbar"><h2>Check-in Petugas</h2><button id="exportCheckinBtn" type="button" class="secondary">Ekspor Check-in CSV</button></div>
+      <p class="muted">Cari nama tamu, pilih tamu yang benar, lalu catat jumlah orang yang benar-benar datang. Perubahan tersimpan ke tabel checkins di Supabase.</p>
+      <div class="formgrid" style="grid-template-columns:2fr 1fr 1fr 1fr">
+        <div><label for="checkinSearch">Nama / nomor / token undangan</label><input id="checkinSearch" placeholder="Cari tamu atau tempel token undangan"></div>
+        <div><label for="checkinGuest">Pilih tamu</label><select id="checkinGuest"><option value="">Pilih tamu...</option></select></div>
+        <div><label for="checkinCount">Jumlah datang</label><input id="checkinCount" type="number" min="0" max="20" value="1"></div>
+        <div><label>&nbsp;</label><button id="saveCheckinBtn" type="button" class="success">Simpan Check-in</button></div>
+      </div>
+      <p id="checkinStatus" class="muted">Jumlah 0 digunakan untuk membatalkan check-in (jika diizinkan database).</p>
+      <div class="tablewrap"><table><thead><tr><th>Nama</th><th>Kuota</th><th>RSVP</th><th>Jumlah hadir aktual</th><th>Tindakan</th></tr></thead><tbody id="checkinBody"></tbody></table></div>
+    </div>
+
+
+    <!-- TAMBAHAN TERISOLASI: QR check-in, tidak mengubah check-in manual -->
+    <div class="card" id="qrCheckinPanel">
+      <div class="topbar"><h2>QR Code &amp; Scan Check-in</h2><button id="qrReloadBtn" class="secondary" type="button">Refresh Data</button></div>
+      <p class="muted">Buat QR tamu dari token undangan yang sudah ada. Scan melalui kamera HP (HTTPS) atau tempel isi QR. Scan tidak langsung mencatat kedatangan; petugas harus mengonfirmasi.</p>
+      <div class="formgrid" style="grid-template-columns:2fr 1fr 1fr 1fr">
+        <div><label for="qrGuestSearch">Cari tamu untuk QR</label><input id="qrGuestSearch" placeholder="Ketik nama atau nomor WhatsApp"></div>
+        <div><label for="qrGuestSelect">Pilih tamu</label><select id="qrGuestSelect"><option value="">Pilih tamu...</option></select></div>
+        <div><label>&nbsp;</label><button id="qrShowBtn" type="button" class="secondary">Tampilkan QR</button></div>
+        <div><label>&nbsp;</label><button id="qrDownloadBtn" type="button" class="secondary" disabled>Unduh QR PNG</button></div>
+      </div>
+      <div id="qrImageBox" class="hidden" style="margin:16px 0; text-align:center">
+        <div id="qrImage" style="display:inline-block;background:white;padding:12px;border:1px solid #e8e1d8;border-radius:12px"></div>
+        <p id="qrGuestCaption" class="muted"></p>
+      </div>
+      <div class="actions" style="margin:14px 0">
+        <button id="qrStartScanBtn" type="button" class="success">Mulai Scan Kamera</button>
+        <button id="qrStopScanBtn" type="button" class="secondary" disabled>Hentikan Kamera</button>
+      </div>
+      <div id="qrCameraBox" class="hidden" style="max-width:440px; margin:12px 0"><div id="qrReader" style="width:100%"></div></div>
+      <label for="qrInput">Hasil scan / token / tautan undangan</label>
+      <div class="actions"><input id="qrInput" style="flex:1;min-width:230px" placeholder="Tempel token atau hasil scan"><button id="qrVerifyBtn" type="button">Periksa QR</button></div>
+      <p id="qrStatus" class="notice" role="status">Belum ada QR yang diperiksa.</p>
+      <div id="qrConfirmBox" class="hidden">
+        <h3 id="qrConfirmName"></h3>
+        <p id="qrConfirmDetails" class="muted"></p>
+        <label for="qrArrivalCount">Jumlah orang datang</label>
+        <input id="qrArrivalCount" type="number" min="1" max="20" value="1" style="max-width:160px">
+        <p><button id="qrConfirmBtn" type="button" class="success">Konfirmasi Check-in QR</button></p>
+      </div>
+    </div>
+
+    <!-- TAMBAHAN: Moderasi Ucapan & Doa (admin saja) -->
+    <div class="card" id="wishesAdminPanel">
+      <div class="topbar">
+        <h2>Kelola Ucapan &amp; Doa</h2>
+        <button id="refreshWishesBtn" type="button" class="secondary">Refresh Ucapan</button>
+      </div>
+      <p id="wishesAdminStatus" class="muted" role="status">Memuat ucapan...</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Pengirim</th><th>Ucapan &amp; Doa</th><th>Status</th><th>Tanggal</th><th>Tindakan</th></tr></thead>
+          <tbody id="wishesAdminBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+/* Bundled MIT-licensed QR encoder (Kazuhiko Arase), locally embedded. */
+(function(){
+const modules = {}; const cache = {};
+function requireLocal(name){ name=name.replace(/^\.\//, ""); if(cache[name])return cache[name].exports; const module={exports:{}};cache[name]=module; modules[name](requireLocal,module,module.exports);return module.exports;}
+modules['QRMode']=function(require,module,exports){
+module.exports = {
+    MODE_NUMBER :       1 << 0,
+    MODE_ALPHA_NUM :    1 << 1,
+    MODE_8BIT_BYTE :    1 << 2,
+    MODE_KANJI :        1 << 3
+};
+
+};
+modules['QRErrorCorrectLevel']=function(require,module,exports){
+module.exports = {
+	L : 1,
+	M : 0,
+	Q : 3,
+	H : 2
+};
+
+
+};
+modules['QRMaskPattern']=function(require,module,exports){
+module.exports = {
+	PATTERN000 : 0,
+	PATTERN001 : 1,
+	PATTERN010 : 2,
+	PATTERN011 : 3,
+	PATTERN100 : 4,
+	PATTERN101 : 5,
+	PATTERN110 : 6,
+	PATTERN111 : 7
+};
+
+};
+modules['QRMath']=function(require,module,exports){
+var QRMath = {
+
+	glog : function(n) {
+	
+		if (n < 1) {
+			throw new Error("glog(" + n + ")");
+		}
+		
+		return QRMath.LOG_TABLE[n];
+	},
+	
+	gexp : function(n) {
+	
+		while (n < 0) {
+			n += 255;
+		}
+	
+		while (n >= 256) {
+			n -= 255;
+		}
+	
+		return QRMath.EXP_TABLE[n];
+	},
+	
+	EXP_TABLE : new Array(256),
+	
+	LOG_TABLE : new Array(256)
+
+};
+	
+for (var i = 0; i < 8; i++) {
+	QRMath.EXP_TABLE[i] = 1 << i;
+}
+for (var i = 8; i < 256; i++) {
+	QRMath.EXP_TABLE[i] = QRMath.EXP_TABLE[i - 4]
+		^ QRMath.EXP_TABLE[i - 5]
+		^ QRMath.EXP_TABLE[i - 6]
+		^ QRMath.EXP_TABLE[i - 8];
+}
+for (var i = 0; i < 255; i++) {
+	QRMath.LOG_TABLE[QRMath.EXP_TABLE[i] ] = i;
+}
+
+module.exports = QRMath;
+
+};
+modules['QRPolynomial']=function(require,module,exports){
+var QRMath = require('./QRMath');
+
+function QRPolynomial(num, shift) {
+	if (num.length === undefined) {
+		throw new Error(num.length + "/" + shift);
+	}
+
+	var offset = 0;
+
+	while (offset < num.length && num[offset] === 0) {
+		offset++;
+	}
+
+	this.num = new Array(num.length - offset + shift);
+	for (var i = 0; i < num.length - offset; i++) {
+		this.num[i] = num[i + offset];
+	}
+}
+
+QRPolynomial.prototype = {
+
+	get : function(index) {
+		return this.num[index];
+	},
+	
+	getLength : function() {
+		return this.num.length;
+	},
+	
+	multiply : function(e) {
+	
+		var num = new Array(this.getLength() + e.getLength() - 1);
+	
+		for (var i = 0; i < this.getLength(); i++) {
+			for (var j = 0; j < e.getLength(); j++) {
+				num[i + j] ^= QRMath.gexp(QRMath.glog(this.get(i) ) + QRMath.glog(e.get(j) ) );
+			}
+		}
+	
+		return new QRPolynomial(num, 0);
+	},
+	
+	mod : function(e) {
+	
+		if (this.getLength() - e.getLength() < 0) {
+			return this;
+		}
+	
+		var ratio = QRMath.glog(this.get(0) ) - QRMath.glog(e.get(0) );
+	
+		var num = new Array(this.getLength() );
+		
+		for (var i = 0; i < this.getLength(); i++) {
+			num[i] = this.get(i);
+		}
+		
+		for (var x = 0; x < e.getLength(); x++) {
+			num[x] ^= QRMath.gexp(QRMath.glog(e.get(x) ) + ratio);
+		}
+	
+		// recursive call
+		return new QRPolynomial(num, 0).mod(e);
+	}
+};
+
+module.exports = QRPolynomial;
+
+};
+modules['QRRSBlock']=function(require,module,exports){
+var QRErrorCorrectLevel = require('./QRErrorCorrectLevel');
+
+function QRRSBlock(totalCount, dataCount) {
+	this.totalCount = totalCount;
+	this.dataCount  = dataCount;
+}
+
+QRRSBlock.RS_BLOCK_TABLE = [
+
+	// L
+	// M
+	// Q
+	// H
+
+	// 1
+	[1, 26, 19],
+	[1, 26, 16],
+	[1, 26, 13],
+	[1, 26, 9],
+	
+	// 2
+	[1, 44, 34],
+	[1, 44, 28],
+	[1, 44, 22],
+	[1, 44, 16],
+
+	// 3
+	[1, 70, 55],
+	[1, 70, 44],
+	[2, 35, 17],
+	[2, 35, 13],
+
+	// 4		
+	[1, 100, 80],
+	[2, 50, 32],
+	[2, 50, 24],
+	[4, 25, 9],
+	
+	// 5
+	[1, 134, 108],
+	[2, 67, 43],
+	[2, 33, 15, 2, 34, 16],
+	[2, 33, 11, 2, 34, 12],
+	
+	// 6
+	[2, 86, 68],
+	[4, 43, 27],
+	[4, 43, 19],
+	[4, 43, 15],
+	
+	// 7		
+	[2, 98, 78],
+	[4, 49, 31],
+	[2, 32, 14, 4, 33, 15],
+	[4, 39, 13, 1, 40, 14],
+	
+	// 8
+	[2, 121, 97],
+	[2, 60, 38, 2, 61, 39],
+	[4, 40, 18, 2, 41, 19],
+	[4, 40, 14, 2, 41, 15],
+	
+	// 9
+	[2, 146, 116],
+	[3, 58, 36, 2, 59, 37],
+	[4, 36, 16, 4, 37, 17],
+	[4, 36, 12, 4, 37, 13],
+	
+	// 10		
+	[2, 86, 68, 2, 87, 69],
+	[4, 69, 43, 1, 70, 44],
+	[6, 43, 19, 2, 44, 20],
+	[6, 43, 15, 2, 44, 16],
+
+	// 11
+	[4, 101, 81],
+	[1, 80, 50, 4, 81, 51],
+	[4, 50, 22, 4, 51, 23],
+	[3, 36, 12, 8, 37, 13],
+
+	// 12
+	[2, 116, 92, 2, 117, 93],
+	[6, 58, 36, 2, 59, 37],
+	[4, 46, 20, 6, 47, 21],
+	[7, 42, 14, 4, 43, 15],
+
+	// 13
+	[4, 133, 107],
+	[8, 59, 37, 1, 60, 38],
+	[8, 44, 20, 4, 45, 21],
+	[12, 33, 11, 4, 34, 12],
+
+	// 14
+	[3, 145, 115, 1, 146, 116],
+	[4, 64, 40, 5, 65, 41],
+	[11, 36, 16, 5, 37, 17],
+	[11, 36, 12, 5, 37, 13],
+
+	// 15
+	[5, 109, 87, 1, 110, 88],
+	[5, 65, 41, 5, 66, 42],
+	[5, 54, 24, 7, 55, 25],
+	[11, 36, 12],
+
+	// 16
+	[5, 122, 98, 1, 123, 99],
+	[7, 73, 45, 3, 74, 46],
+	[15, 43, 19, 2, 44, 20],
+	[3, 45, 15, 13, 46, 16],
+
+	// 17
+	[1, 135, 107, 5, 136, 108],
+	[10, 74, 46, 1, 75, 47],
+	[1, 50, 22, 15, 51, 23],
+	[2, 42, 14, 17, 43, 15],
+
+	// 18
+	[5, 150, 120, 1, 151, 121],
+	[9, 69, 43, 4, 70, 44],
+	[17, 50, 22, 1, 51, 23],
+	[2, 42, 14, 19, 43, 15],
+
+	// 19
+	[3, 141, 113, 4, 142, 114],
+	[3, 70, 44, 11, 71, 45],
+	[17, 47, 21, 4, 48, 22],
+	[9, 39, 13, 16, 40, 14],
+
+	// 20
+	[3, 135, 107, 5, 136, 108],
+	[3, 67, 41, 13, 68, 42],
+	[15, 54, 24, 5, 55, 25],
+	[15, 43, 15, 10, 44, 16],
+
+	// 21
+	[4, 144, 116, 4, 145, 117],
+	[17, 68, 42],
+	[17, 50, 22, 6, 51, 23],
+	[19, 46, 16, 6, 47, 17],
+
+	// 22
+	[2, 139, 111, 7, 140, 112],
+	[17, 74, 46],
+	[7, 54, 24, 16, 55, 25],
+	[34, 37, 13],
+
+	// 23
+	[4, 151, 121, 5, 152, 122],
+	[4, 75, 47, 14, 76, 48],
+	[11, 54, 24, 14, 55, 25],
+	[16, 45, 15, 14, 46, 16],
+
+	// 24
+	[6, 147, 117, 4, 148, 118],
+	[6, 73, 45, 14, 74, 46],
+	[11, 54, 24, 16, 55, 25],
+	[30, 46, 16, 2, 47, 17],
+
+	// 25
+	[8, 132, 106, 4, 133, 107],
+	[8, 75, 47, 13, 76, 48],
+	[7, 54, 24, 22, 55, 25],
+	[22, 45, 15, 13, 46, 16],
+
+	// 26
+	[10, 142, 114, 2, 143, 115],
+	[19, 74, 46, 4, 75, 47],
+	[28, 50, 22, 6, 51, 23],
+	[33, 46, 16, 4, 47, 17],
+
+	// 27
+	[8, 152, 122, 4, 153, 123],
+	[22, 73, 45, 3, 74, 46],
+	[8, 53, 23, 26, 54, 24],
+	[12, 45, 15, 28, 46, 16],
+
+	// 28
+	[3, 147, 117, 10, 148, 118],
+	[3, 73, 45, 23, 74, 46],
+	[4, 54, 24, 31, 55, 25],
+	[11, 45, 15, 31, 46, 16],
+
+	// 29
+	[7, 146, 116, 7, 147, 117],
+	[21, 73, 45, 7, 74, 46],
+	[1, 53, 23, 37, 54, 24],
+	[19, 45, 15, 26, 46, 16],
+
+	// 30
+	[5, 145, 115, 10, 146, 116],
+	[19, 75, 47, 10, 76, 48],
+	[15, 54, 24, 25, 55, 25],
+	[23, 45, 15, 25, 46, 16],
+
+	// 31
+	[13, 145, 115, 3, 146, 116],
+	[2, 74, 46, 29, 75, 47],
+	[42, 54, 24, 1, 55, 25],
+	[23, 45, 15, 28, 46, 16],
+
+	// 32
+	[17, 145, 115],
+	[10, 74, 46, 23, 75, 47],
+	[10, 54, 24, 35, 55, 25],
+	[19, 45, 15, 35, 46, 16],
+
+	// 33
+	[17, 145, 115, 1, 146, 116],
+	[14, 74, 46, 21, 75, 47],
+	[29, 54, 24, 19, 55, 25],
+	[11, 45, 15, 46, 46, 16],
+
+	// 34
+	[13, 145, 115, 6, 146, 116],
+	[14, 74, 46, 23, 75, 47],
+	[44, 54, 24, 7, 55, 25],
+	[59, 46, 16, 1, 47, 17],
+
+	// 35
+	[12, 151, 121, 7, 152, 122],
+	[12, 75, 47, 26, 76, 48],
+	[39, 54, 24, 14, 55, 25],
+	[22, 45, 15, 41, 46, 16],
+
+	// 36
+	[6, 151, 121, 14, 152, 122],
+	[6, 75, 47, 34, 76, 48],
+	[46, 54, 24, 10, 55, 25],
+	[2, 45, 15, 64, 46, 16],
+
+	// 37
+	[17, 152, 122, 4, 153, 123],
+	[29, 74, 46, 14, 75, 47],
+	[49, 54, 24, 10, 55, 25],
+	[24, 45, 15, 46, 46, 16],
+
+	// 38
+	[4, 152, 122, 18, 153, 123],
+	[13, 74, 46, 32, 75, 47],
+	[48, 54, 24, 14, 55, 25],
+	[42, 45, 15, 32, 46, 16],
+
+	// 39
+	[20, 147, 117, 4, 148, 118],
+	[40, 75, 47, 7, 76, 48],
+	[43, 54, 24, 22, 55, 25],
+	[10, 45, 15, 67, 46, 16],
+
+	// 40
+	[19, 148, 118, 6, 149, 119],
+	[18, 75, 47, 31, 76, 48],
+	[34, 54, 24, 34, 55, 25],
+	[20, 45, 15, 61, 46, 16]
+];
+
+QRRSBlock.getRSBlocks = function(typeNumber, errorCorrectLevel) {
+	
+	var rsBlock = QRRSBlock.getRsBlockTable(typeNumber, errorCorrectLevel);
+	
+	if (rsBlock === undefined) {
+		throw new Error("bad rs block @ typeNumber:" + typeNumber + "/errorCorrectLevel:" + errorCorrectLevel);
+	}
+
+	var length = rsBlock.length / 3;
+	
+	var list = [];
+	
+	for (var i = 0; i < length; i++) {
+
+		var count = rsBlock[i * 3 + 0];
+		var totalCount = rsBlock[i * 3 + 1];
+		var dataCount  = rsBlock[i * 3 + 2];
+
+		for (var j = 0; j < count; j++) {
+			list.push(new QRRSBlock(totalCount, dataCount) );	
+		}
+	}
+	
+	return list;
+};
+
+QRRSBlock.getRsBlockTable = function(typeNumber, errorCorrectLevel) {
+
+	switch(errorCorrectLevel) {
+	case QRErrorCorrectLevel.L :
+		return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 0];
+	case QRErrorCorrectLevel.M :
+		return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 1];
+	case QRErrorCorrectLevel.Q :
+		return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 2];
+	case QRErrorCorrectLevel.H :
+		return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 3];
+	default :
+		return undefined;
+	}
+};
+
+module.exports = QRRSBlock;
+
+};
+modules['QRBitBuffer']=function(require,module,exports){
+function QRBitBuffer() {
+	this.buffer = [];
+	this.length = 0;
+}
+
+QRBitBuffer.prototype = {
+
+	get : function(index) {
+		var bufIndex = Math.floor(index / 8);
+		return ( (this.buffer[bufIndex] >>> (7 - index % 8) ) & 1) == 1;
+	},
+	
+	put : function(num, length) {
+		for (var i = 0; i < length; i++) {
+			this.putBit( ( (num >>> (length - i - 1) ) & 1) == 1);
+		}
+	},
+	
+	getLengthInBits : function() {
+		return this.length;
+	},
+	
+	putBit : function(bit) {
+	
+		var bufIndex = Math.floor(this.length / 8);
+		if (this.buffer.length <= bufIndex) {
+			this.buffer.push(0);
+		}
+	
+		if (bit) {
+			this.buffer[bufIndex] |= (0x80 >>> (this.length % 8) );
+		}
+	
+		this.length++;
+	}
+};
+
+module.exports = QRBitBuffer;
+
+};
+modules['QR8bitByte']=function(require,module,exports){
+var QRMode = require('./QRMode');
+
+function QR8bitByte(data) {
+	this.mode = QRMode.MODE_8BIT_BYTE;
+	this.data = data;
+}
+
+QR8bitByte.prototype = {
+
+	getLength : function() {
+		return this.data.length;
+	},
+	
+	write : function(buffer) {
+		for (var i = 0; i < this.data.length; i++) {
+			// not JIS ...
+			buffer.put(this.data.charCodeAt(i), 8);
+		}
+	}
+};
+
+module.exports = QR8bitByte;
+
+};
+modules['QRUtil']=function(require,module,exports){
+var QRMode = require('./QRMode');
+var QRPolynomial = require('./QRPolynomial');
+var QRMath = require('./QRMath');
+var QRMaskPattern = require('./QRMaskPattern');
+
+var QRUtil = {
+
+    PATTERN_POSITION_TABLE : [
+        [],
+        [6, 18],
+        [6, 22],
+        [6, 26],
+        [6, 30],
+        [6, 34],
+        [6, 22, 38],
+        [6, 24, 42],
+        [6, 26, 46],
+        [6, 28, 50],
+        [6, 30, 54],        
+        [6, 32, 58],
+        [6, 34, 62],
+        [6, 26, 46, 66],
+        [6, 26, 48, 70],
+        [6, 26, 50, 74],
+        [6, 30, 54, 78],
+        [6, 30, 56, 82],
+        [6, 30, 58, 86],
+        [6, 34, 62, 90],
+        [6, 28, 50, 72, 94],
+        [6, 26, 50, 74, 98],
+        [6, 30, 54, 78, 102],
+        [6, 28, 54, 80, 106],
+        [6, 32, 58, 84, 110],
+        [6, 30, 58, 86, 114],
+        [6, 34, 62, 90, 118],
+        [6, 26, 50, 74, 98, 122],
+        [6, 30, 54, 78, 102, 126],
+        [6, 26, 52, 78, 104, 130],
+        [6, 30, 56, 82, 108, 134],
+        [6, 34, 60, 86, 112, 138],
+        [6, 30, 58, 86, 114, 142],
+        [6, 34, 62, 90, 118, 146],
+        [6, 30, 54, 78, 102, 126, 150],
+        [6, 24, 50, 76, 102, 128, 154],
+        [6, 28, 54, 80, 106, 132, 158],
+        [6, 32, 58, 84, 110, 136, 162],
+        [6, 26, 54, 82, 110, 138, 166],
+        [6, 30, 58, 86, 114, 142, 170]
+    ],
+
+    G15 : (1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) | (1 << 2) | (1 << 1) | (1 << 0),
+    G18 : (1 << 12) | (1 << 11) | (1 << 10) | (1 << 9) | (1 << 8) | (1 << 5) | (1 << 2) | (1 << 0),
+    G15_MASK : (1 << 14) | (1 << 12) | (1 << 10)    | (1 << 4) | (1 << 1),
+
+    getBCHTypeInfo : function(data) {
+        var d = data << 10;
+        while (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G15) >= 0) {
+            d ^= (QRUtil.G15 << (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G15) ) );    
+        }
+        return ( (data << 10) | d) ^ QRUtil.G15_MASK;
+    },
+
+    getBCHTypeNumber : function(data) {
+        var d = data << 12;
+        while (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G18) >= 0) {
+            d ^= (QRUtil.G18 << (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G18) ) );    
+        }
+        return (data << 12) | d;
+    },
+
+    getBCHDigit : function(data) {
+
+        var digit = 0;
+
+        while (data !== 0) {
+            digit++;
+            data >>>= 1;
+        }
+
+        return digit;
+    },
+
+    getPatternPosition : function(typeNumber) {
+        return QRUtil.PATTERN_POSITION_TABLE[typeNumber - 1];
+    },
+
+    getMask : function(maskPattern, i, j) {
+        
+        switch (maskPattern) {
+            
+        case QRMaskPattern.PATTERN000 : return (i + j) % 2 === 0;
+        case QRMaskPattern.PATTERN001 : return i % 2 === 0;
+        case QRMaskPattern.PATTERN010 : return j % 3 === 0;
+        case QRMaskPattern.PATTERN011 : return (i + j) % 3 === 0;
+        case QRMaskPattern.PATTERN100 : return (Math.floor(i / 2) + Math.floor(j / 3) ) % 2 === 0;
+        case QRMaskPattern.PATTERN101 : return (i * j) % 2 + (i * j) % 3 === 0;
+        case QRMaskPattern.PATTERN110 : return ( (i * j) % 2 + (i * j) % 3) % 2 === 0;
+        case QRMaskPattern.PATTERN111 : return ( (i * j) % 3 + (i + j) % 2) % 2 === 0;
+
+        default :
+            throw new Error("bad maskPattern:" + maskPattern);
+        }
+    },
+
+    getErrorCorrectPolynomial : function(errorCorrectLength) {
+
+        var a = new QRPolynomial([1], 0);
+
+        for (var i = 0; i < errorCorrectLength; i++) {
+            a = a.multiply(new QRPolynomial([1, QRMath.gexp(i)], 0) );
+        }
+
+        return a;
+    },
+
+    getLengthInBits : function(mode, type) {
+
+        if (1 <= type && type < 10) {
+
+            // 1 - 9
+
+            switch(mode) {
+            case QRMode.MODE_NUMBER     : return 10;
+            case QRMode.MODE_ALPHA_NUM  : return 9;
+            case QRMode.MODE_8BIT_BYTE  : return 8;
+            case QRMode.MODE_KANJI      : return 8;
+            default :
+                throw new Error("mode:" + mode);
+            }
+
+        } else if (type < 27) {
+
+            // 10 - 26
+
+            switch(mode) {
+            case QRMode.MODE_NUMBER     : return 12;
+            case QRMode.MODE_ALPHA_NUM  : return 11;
+            case QRMode.MODE_8BIT_BYTE  : return 16;
+            case QRMode.MODE_KANJI      : return 10;
+            default :
+                throw new Error("mode:" + mode);
+            }
+
+        } else if (type < 41) {
+
+            // 27 - 40
+
+            switch(mode) {
+            case QRMode.MODE_NUMBER     : return 14;
+            case QRMode.MODE_ALPHA_NUM  : return 13;
+            case QRMode.MODE_8BIT_BYTE  : return 16;
+            case QRMode.MODE_KANJI      : return 12;
+            default :
+                throw new Error("mode:" + mode);
+            }
+
+        } else {
+            throw new Error("type:" + type);
+        }
+    },
+
+    getLostPoint : function(qrCode) {
+        
+        var moduleCount = qrCode.getModuleCount();
+        var lostPoint = 0;
+        var row = 0; 
+        var col = 0;
+
+        
+        // LEVEL1
+        
+        for (row = 0; row < moduleCount; row++) {
+
+            for (col = 0; col < moduleCount; col++) {
+
+                var sameCount = 0;
+                var dark = qrCode.isDark(row, col);
+
+                for (var r = -1; r <= 1; r++) {
+
+                    if (row + r < 0 || moduleCount <= row + r) {
+                        continue;
+                    }
+
+                    for (var c = -1; c <= 1; c++) {
+
+                        if (col + c < 0 || moduleCount <= col + c) {
+                            continue;
+                        }
+
+                        if (r === 0 && c === 0) {
+                            continue;
+                        }
+
+                        if (dark === qrCode.isDark(row + r, col + c) ) {
+                            sameCount++;
+                        }
+                    }
+                }
+
+                if (sameCount > 5) {
+                    lostPoint += (3 + sameCount - 5);
+                }
+            }
+        }
+
+        // LEVEL2
+
+        for (row = 0; row < moduleCount - 1; row++) {
+            for (col = 0; col < moduleCount - 1; col++) {
+                var count = 0;
+                if (qrCode.isDark(row,     col    ) ) count++;
+                if (qrCode.isDark(row + 1, col    ) ) count++;
+                if (qrCode.isDark(row,     col + 1) ) count++;
+                if (qrCode.isDark(row + 1, col + 1) ) count++;
+                if (count === 0 || count === 4) {
+                    lostPoint += 3;
+                }
+            }
+        }
+
+        // LEVEL3
+
+        for (row = 0; row < moduleCount; row++) {
+            for (col = 0; col < moduleCount - 6; col++) {
+                if (qrCode.isDark(row, col) && 
+                        !qrCode.isDark(row, col + 1) && 
+                         qrCode.isDark(row, col + 2) && 
+                         qrCode.isDark(row, col + 3) && 
+                         qrCode.isDark(row, col + 4) && 
+                        !qrCode.isDark(row, col + 5) && 
+                         qrCode.isDark(row, col + 6) ) {
+                    lostPoint += 40;
+                }
+            }
+        }
+
+        for (col = 0; col < moduleCount; col++) {
+            for (row = 0; row < moduleCount - 6; row++) {
+                if (qrCode.isDark(row, col) &&
+                        !qrCode.isDark(row + 1, col) &&
+                         qrCode.isDark(row + 2, col) &&
+                         qrCode.isDark(row + 3, col) &&
+                         qrCode.isDark(row + 4, col) &&
+                        !qrCode.isDark(row + 5, col) &&
+                         qrCode.isDark(row + 6, col) ) {
+                    lostPoint += 40;
+                }
+            }
+        }
+
+        // LEVEL4
+        
+        var darkCount = 0;
+
+        for (col = 0; col < moduleCount; col++) {
+            for (row = 0; row < moduleCount; row++) {
+                if (qrCode.isDark(row, col) ) {
+                    darkCount++;
+                }
+            }
+        }
+        
+        var ratio = Math.abs(100 * darkCount / moduleCount / moduleCount - 50) / 5;
+        lostPoint += ratio * 10;
+
+        return lostPoint;       
+    }
+
+};
+
+module.exports = QRUtil;
+
+};
+modules['index']=function(require,module,exports){
+//---------------------------------------------------------------------
+// QRCode for JavaScript
+//
+// Copyright (c) 2009 Kazuhiko Arase
+//
+// URL: http://www.d-project.com/
+//
+// Licensed under the MIT license:
+//   http://www.opensource.org/licenses/mit-license.php
+//
+// The word "QR Code" is registered trademark of 
+// DENSO WAVE INCORPORATED
+//   http://www.denso-wave.com/qrcode/faqpatent-e.html
+//
+//---------------------------------------------------------------------
+// Modified to work in node for this project (and some refactoring)
+//---------------------------------------------------------------------
+
+var QR8bitByte = require('./QR8bitByte');
+var QRUtil = require('./QRUtil');
+var QRPolynomial = require('./QRPolynomial');
+var QRRSBlock = require('./QRRSBlock');
+var QRBitBuffer = require('./QRBitBuffer');
+
+function QRCode(typeNumber, errorCorrectLevel) {
+	this.typeNumber = typeNumber;
+	this.errorCorrectLevel = errorCorrectLevel;
+	this.modules = null;
+	this.moduleCount = 0;
+	this.dataCache = null;
+	this.dataList = [];
+}
+
+QRCode.prototype = {
+	
+	addData : function(data) {
+		var newData = new QR8bitByte(data);
+		this.dataList.push(newData);
+		this.dataCache = null;
+	},
+	
+	isDark : function(row, col) {
+		if (row < 0 || this.moduleCount <= row || col < 0 || this.moduleCount <= col) {
+			throw new Error(row + "," + col);
+		}
+		return this.modules[row][col];
+	},
+
+	getModuleCount : function() {
+		return this.moduleCount;
+	},
+	
+	make : function() {
+		// Calculate automatically typeNumber if provided is < 1
+		if (this.typeNumber < 1 ){
+			var typeNumber = 1;
+			for (typeNumber = 1; typeNumber < 40; typeNumber++) {
+				var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, this.errorCorrectLevel);
+
+				var buffer = new QRBitBuffer();
+				var totalDataCount = 0;
+				for (var i = 0; i < rsBlocks.length; i++) {
+					totalDataCount += rsBlocks[i].dataCount;
+				}
+
+				for (var x = 0; x < this.dataList.length; x++) {
+					var data = this.dataList[x];
+					buffer.put(data.mode, 4);
+					buffer.put(data.getLength(), QRUtil.getLengthInBits(data.mode, typeNumber) );
+					data.write(buffer);
+				}
+				if (buffer.getLengthInBits() <= totalDataCount * 8)
+					break;
+			}
+			this.typeNumber = typeNumber;
+		}
+		this.makeImpl(false, this.getBestMaskPattern() );
+	},
+	
+	makeImpl : function(test, maskPattern) {
+		
+		this.moduleCount = this.typeNumber * 4 + 17;
+		this.modules = new Array(this.moduleCount);
+		
+		for (var row = 0; row < this.moduleCount; row++) {
+			
+			this.modules[row] = new Array(this.moduleCount);
+			
+			for (var col = 0; col < this.moduleCount; col++) {
+				this.modules[row][col] = null;//(col + row) % 3;
+			}
+		}
+	
+		this.setupPositionProbePattern(0, 0);
+		this.setupPositionProbePattern(this.moduleCount - 7, 0);
+		this.setupPositionProbePattern(0, this.moduleCount - 7);
+		this.setupPositionAdjustPattern();
+		this.setupTimingPattern();
+		this.setupTypeInfo(test, maskPattern);
+		
+		if (this.typeNumber >= 7) {
+			this.setupTypeNumber(test);
+		}
+	
+		if (this.dataCache === null) {
+			this.dataCache = QRCode.createData(this.typeNumber, this.errorCorrectLevel, this.dataList);
+		}
+	
+		this.mapData(this.dataCache, maskPattern);
+	},
+
+	setupPositionProbePattern : function(row, col)  {
+		
+		for (var r = -1; r <= 7; r++) {
+			
+			if (row + r <= -1 || this.moduleCount <= row + r) continue;
+			
+			for (var c = -1; c <= 7; c++) {
+				
+				if (col + c <= -1 || this.moduleCount <= col + c) continue;
+				
+				if ( (0 <= r && r <= 6 && (c === 0 || c === 6) ) || 
+                     (0 <= c && c <= 6 && (r === 0 || r === 6) ) || 
+                     (2 <= r && r <= 4 && 2 <= c && c <= 4) ) {
+					this.modules[row + r][col + c] = true;
+				} else {
+					this.modules[row + r][col + c] = false;
+				}
+			}		
+		}		
+	},
+	
+	getBestMaskPattern : function() {
+	
+		var minLostPoint = 0;
+		var pattern = 0;
+	
+		for (var i = 0; i < 8; i++) {
+			
+			this.makeImpl(true, i);
+	
+			var lostPoint = QRUtil.getLostPoint(this);
+	
+			if (i === 0 || minLostPoint >  lostPoint) {
+				minLostPoint = lostPoint;
+				pattern = i;
+			}
+		}
+	
+		return pattern;
+	},
+	
+	createMovieClip : function(target_mc, instance_name, depth) {
+	
+		var qr_mc = target_mc.createEmptyMovieClip(instance_name, depth);
+		var cs = 1;
+	
+		this.make();
+
+		for (var row = 0; row < this.modules.length; row++) {
+			
+			var y = row * cs;
+			
+			for (var col = 0; col < this.modules[row].length; col++) {
+	
+				var x = col * cs;
+				var dark = this.modules[row][col];
+			
+				if (dark) {
+					qr_mc.beginFill(0, 100);
+					qr_mc.moveTo(x, y);
+					qr_mc.lineTo(x + cs, y);
+					qr_mc.lineTo(x + cs, y + cs);
+					qr_mc.lineTo(x, y + cs);
+					qr_mc.endFill();
+				}
+			}
+		}
+		
+		return qr_mc;
+	},
+
+	setupTimingPattern : function() {
+		
+		for (var r = 8; r < this.moduleCount - 8; r++) {
+			if (this.modules[r][6] !== null) {
+				continue;
+			}
+			this.modules[r][6] = (r % 2 === 0);
+		}
+	
+		for (var c = 8; c < this.moduleCount - 8; c++) {
+			if (this.modules[6][c] !== null) {
+				continue;
+			}
+			this.modules[6][c] = (c % 2 === 0);
+		}
+	},
+	
+	setupPositionAdjustPattern : function() {
+	
+		var pos = QRUtil.getPatternPosition(this.typeNumber);
+		
+		for (var i = 0; i < pos.length; i++) {
+		
+			for (var j = 0; j < pos.length; j++) {
+			
+				var row = pos[i];
+				var col = pos[j];
+				
+				if (this.modules[row][col] !== null) {
+					continue;
+				}
+				
+				for (var r = -2; r <= 2; r++) {
+				
+					for (var c = -2; c <= 2; c++) {
+					
+						if (Math.abs(r) === 2 || 
+                            Math.abs(c) === 2 ||
+                            (r === 0 && c === 0) ) {
+							this.modules[row + r][col + c] = true;
+						} else {
+							this.modules[row + r][col + c] = false;
+						}
+					}
+				}
+			}
+		}
+	},
+	
+	setupTypeNumber : function(test) {
+	
+		var bits = QRUtil.getBCHTypeNumber(this.typeNumber);
+        var mod;
+	
+		for (var i = 0; i < 18; i++) {
+			mod = (!test && ( (bits >> i) & 1) === 1);
+			this.modules[Math.floor(i / 3)][i % 3 + this.moduleCount - 8 - 3] = mod;
+		}
+	
+		for (var x = 0; x < 18; x++) {
+			mod = (!test && ( (bits >> x) & 1) === 1);
+			this.modules[x % 3 + this.moduleCount - 8 - 3][Math.floor(x / 3)] = mod;
+		}
+	},
+	
+	setupTypeInfo : function(test, maskPattern) {
+	
+		var data = (this.errorCorrectLevel << 3) | maskPattern;
+		var bits = QRUtil.getBCHTypeInfo(data);
+        var mod;
+	
+		// vertical		
+		for (var v = 0; v < 15; v++) {
+	
+			mod = (!test && ( (bits >> v) & 1) === 1);
+	
+			if (v < 6) {
+				this.modules[v][8] = mod;
+			} else if (v < 8) {
+				this.modules[v + 1][8] = mod;
+			} else {
+				this.modules[this.moduleCount - 15 + v][8] = mod;
+			}
+		}
+	
+		// horizontal
+		for (var h = 0; h < 15; h++) {
+	
+			mod = (!test && ( (bits >> h) & 1) === 1);
+			
+			if (h < 8) {
+				this.modules[8][this.moduleCount - h - 1] = mod;
+			} else if (h < 9) {
+				this.modules[8][15 - h - 1 + 1] = mod;
+			} else {
+				this.modules[8][15 - h - 1] = mod;
+			}
+		}
+	
+		// fixed module
+		this.modules[this.moduleCount - 8][8] = (!test);
+	
+	},
+	
+	mapData : function(data, maskPattern) {
+		
+		var inc = -1;
+		var row = this.moduleCount - 1;
+		var bitIndex = 7;
+		var byteIndex = 0;
+		
+		for (var col = this.moduleCount - 1; col > 0; col -= 2) {
+	
+			if (col === 6) col--;
+	
+			while (true) {
+	
+				for (var c = 0; c < 2; c++) {
+					
+					if (this.modules[row][col - c] === null) {
+						
+						var dark = false;
+	
+						if (byteIndex < data.length) {
+							dark = ( ( (data[byteIndex] >>> bitIndex) & 1) === 1);
+						}
+	
+						var mask = QRUtil.getMask(maskPattern, row, col - c);
+	
+						if (mask) {
+							dark = !dark;
+						}
+						
+						this.modules[row][col - c] = dark;
+						bitIndex--;
+	
+						if (bitIndex === -1) {
+							byteIndex++;
+							bitIndex = 7;
+						}
+					}
+				}
+								
+				row += inc;
+	
+				if (row < 0 || this.moduleCount <= row) {
+					row -= inc;
+					inc = -inc;
+					break;
+				}
+			}
+		}
+		
+	}
+
+};
+
+QRCode.PAD0 = 0xEC;
+QRCode.PAD1 = 0x11;
+
+QRCode.createData = function(typeNumber, errorCorrectLevel, dataList) {
+	
+	var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, errorCorrectLevel);
+	
+	var buffer = new QRBitBuffer();
+	
+	for (var i = 0; i < dataList.length; i++) {
+		var data = dataList[i];
+		buffer.put(data.mode, 4);
+		buffer.put(data.getLength(), QRUtil.getLengthInBits(data.mode, typeNumber) );
+		data.write(buffer);
+	}
+
+	// calc num max data.
+	var totalDataCount = 0;
+	for (var x = 0; x < rsBlocks.length; x++) {
+		totalDataCount += rsBlocks[x].dataCount;
+	}
+
+	if (buffer.getLengthInBits() > totalDataCount * 8) {
+		throw new Error("code length overflow. (" + 
+            buffer.getLengthInBits() + 
+            ">" +  
+            totalDataCount * 8 + 
+            ")");
+	}
+
+	// end code
+	if (buffer.getLengthInBits() + 4 <= totalDataCount * 8) {
+		buffer.put(0, 4);
+	}
+
+	// padding
+	while (buffer.getLengthInBits() % 8 !== 0) {
+		buffer.putBit(false);
+	}
+
+	// padding
+	while (true) {
+		
+		if (buffer.getLengthInBits() >= totalDataCount * 8) {
+			break;
+		}
+		buffer.put(QRCode.PAD0, 8);
+		
+		if (buffer.getLengthInBits() >= totalDataCount * 8) {
+			break;
+		}
+		buffer.put(QRCode.PAD1, 8);
+	}
+
+	return QRCode.createBytes(buffer, rsBlocks);
+};
+
+QRCode.createBytes = function(buffer, rsBlocks) {
+
+	var offset = 0;
+	
+	var maxDcCount = 0;
+	var maxEcCount = 0;
+	
+	var dcdata = new Array(rsBlocks.length);
+	var ecdata = new Array(rsBlocks.length);
+	
+	for (var r = 0; r < rsBlocks.length; r++) {
+
+		var dcCount = rsBlocks[r].dataCount;
+		var ecCount = rsBlocks[r].totalCount - dcCount;
+
+		maxDcCount = Math.max(maxDcCount, dcCount);
+		maxEcCount = Math.max(maxEcCount, ecCount);
+		
+		dcdata[r] = new Array(dcCount);
+		
+		for (var i = 0; i < dcdata[r].length; i++) {
+			dcdata[r][i] = 0xff & buffer.buffer[i + offset];
+		}
+		offset += dcCount;
+		
+		var rsPoly = QRUtil.getErrorCorrectPolynomial(ecCount);
+		var rawPoly = new QRPolynomial(dcdata[r], rsPoly.getLength() - 1);
+
+		var modPoly = rawPoly.mod(rsPoly);
+		ecdata[r] = new Array(rsPoly.getLength() - 1);
+		for (var x = 0; x < ecdata[r].length; x++) {
+            var modIndex = x + modPoly.getLength() - ecdata[r].length;
+			ecdata[r][x] = (modIndex >= 0)? modPoly.get(modIndex) : 0;
+		}
+
+	}
+	
+	var totalCodeCount = 0;
+	for (var y = 0; y < rsBlocks.length; y++) {
+		totalCodeCount += rsBlocks[y].totalCount;
+	}
+
+	var data = new Array(totalCodeCount);
+	var index = 0;
+
+	for (var z = 0; z < maxDcCount; z++) {
+		for (var s = 0; s < rsBlocks.length; s++) {
+			if (z < dcdata[s].length) {
+				data[index++] = dcdata[s][z];
+			}
+		}
+	}
+
+	for (var xx = 0; xx < maxEcCount; xx++) {
+		for (var t = 0; t < rsBlocks.length; t++) {
+			if (xx < ecdata[t].length) {
+				data[index++] = ecdata[t][xx];
+			}
+		}
+	}
+
+	return data;
+
+};
+
+module.exports = QRCode;
+
+};
+window.WeddingQRMatrix = requireLocal("index");
+})();
+</script>
+<script type="module">
+  import {
+    createClient
+  } from "https://esm.sh/@supabase/supabase-js@2";
+
+  // KONFIGURASI — GANTI PUBLISHABLE KEY DI BAWAH.
+  // Pastikan URL sesuai Project URL Supabase Anda.
+  const SUPABASE_URL =
+    "https://itaphjltcgsrayxyzdoe.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable_0xY4VXW6NB7CJKU1K6-lfw_Srq7bx0m";
+
+  const INVITATION_URL =
+    "https://dgunawan0924-rgb.github.io/undangan-wedding/";
+
+  const configured =
+    SUPABASE_KEY.startsWith("sb_publishable_") &&
+    !SUPABASE_KEY.includes("ISI_");
+
+  const $ = id => document.getElementById(id);
+  let db;
+  let guests = [];
+  let rsvps = [];
+  let checkins = [];
+  let editingId = null;
+  let csvRows = [];
+
+  function notify(text, error = false) {
+    const el = $("message");
+    el.textContent = text;
+    el.className = "notice " + (error ? "error" : "ok");
+    window.scrollTo({top: 0, behavior: "smooth"});
+  }
+
+  function clearMessage() {
+    $("message").className = "notice hidden";
+  }
+
+  function normalizePhone(value) {
+    let p = String(value || "").replace(/[^\d]/g, "");
+    if (p.startsWith("0")) p = "62" + p.slice(1);
+    else if (p.startsWith("8")) p = "62" + p;
+    return p;
+  }
+
+  function validPhone(p) {
+    return !p || /^62\d{8,13}$/.test(p);
+  }
+
+  function makeLink(guest) {
+    const url = new URL(INVITATION_URL);
+    url.searchParams.set("invite", guest.invitation_token);
+    return url.toString();
+  }
+
+  function whatsappMessage(guest) {
+    return `UNDANGAN PERNIKAHAN
+Danni & Riska
+
+Salam sejahtera,
+
+Dengan penuh rasa syukur, kami mengundang ${guest.name} untuk hadir dan berbagi sukacita dalam pernikahan kami.
+
+Minggu, 22 November 2026
+
+Pemberkatan
+Pukul 10.00 WIB
+Gereja Masehi Advent Hari Ketujuh - Rawamangun, Jakarta Timur
+
+Resepsi
+Pukul 12.00 WIB
+Gedung Maranatha - Rawamangun, Jakarta Timur
+
+Undangan lengkap dapat dilihat melalui tautan berikut:
+${makeLink(guest)}
+
+Kehadiran dan doa restu Anda akan menjadi kebahagiaan tersendiri bagi kami saat memulai babak baru dalam kehidupan bersama.
+
+Tuhan memberkati,
+Danni & Riska`;
+  }
+
+  function button(text, className, handler) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = text;
+    if (className) b.className = className;
+    b.addEventListener("click", handler);
+    return b;
+  }
+
+  function td(text) {
+    const el = document.createElement("td");
+    el.textContent = String(text ?? "");
+    return el;
+  }
+
+  async function verifyAdmin() {
+    const {data, error} = await db.rpc("is_wedding_admin");
+    if (error) throw error;
+    return data === true;
+  }
+
+  async function showDashboard() {
+    const {data: {user}, error} = await db.auth.getUser();
+    if (error || !user) {
+      $("loginPanel").classList.remove("hidden");
+      $("dashboard").classList.add("hidden");
+      return;
+    }
+
+    if (!(await verifyAdmin())) {
+      await db.auth.signOut();
+      $("loginPanel").classList.remove("hidden");
+      $("dashboard").classList.add("hidden");
+      notify("Akun ini bukan administrator.", true);
+      return;
+    }
+
+    $("adminEmail").textContent = user.email || "";
+    $("loginPanel").classList.add("hidden");
+    $("dashboard").classList.remove("hidden");
+    await loadData();
+    await loadWishesAdmin();
+    qrUpdateGuestList();
+  }
+
+  async function fetchAll(table, columns) {
+    let all = [];
+    let from = 0;
+    const pageSize = 500;
+
+    while (true) {
+      const {data, error} = await db
+        .from(table)
+        .select(columns)
+        .range(from, from + pageSize - 1);
+
+      if (error) throw error;
+      all.push(...data);
+
+      if (data.length < pageSize) break;
+      from += pageSize;
+    }
+    return all;
+  }
+
+  async function loadData() {
+    try {
+      const [g, r, c] = await Promise.all([
+        fetchAll("guests",
+          "id,name,phone,quota,invitation_token,created_at"),
+        fetchAll("rsvps",
+          "guest_id,status,guest_count"),
+        fetchAll("checkins",
+          "guest_id,actual_count")
+      ]);
+
+      guests = g.sort((a, b) =>
+        a.name.localeCompare(b.name, "id"));
+      rsvps = r;
+      checkins = c;
+
+      $("totalGuests").textContent = guests.length;
+      $("totalQuota").textContent =
+        guests.reduce((n, g) => n + g.quota, 0);
+      $("totalPresent").textContent =
+        rsvps.filter(r => r.status === "hadir")
+             .reduce((n, r) => n + (r.guest_count || 0), 0);
+      $("totalCheckins").textContent =
+        checkins.reduce((n, c) => n + (c.actual_count || 0), 0);
+
+      renderGuests();
+      renderRsvpManagement();
+      renderCheckinManagement();
+      qrUpdateGuestList();
+    } catch (e) {
+      notify("Gagal mengambil data: " + e.message, true);
+    }
+  }
+
+  function renderGuests() {
+    const q = $("searchGuest").value.toLowerCase().trim();
+    const list = guests.filter(g =>
+      g.name.toLowerCase().includes(q) ||
+      (g.phone || "").includes(q));
+
+    $("guestCount").textContent =
+      `${list.length} dari ${guests.length} undangan`;
+
+    const body = $("guestBody");
+    body.replaceChildren();
+
+    for (const g of list) {
+      const row = document.createElement("tr");
+      const rsvp = rsvps.find(r => r.guest_id === g.id);
+
+      row.append(
+        td(g.name),
+        td(g.phone || "-"),
+        td(g.quota),
+        td(rsvp?.status || "Belum RSVP")
+      );
+
+      const actions = document.createElement("td");
+      const wrap = document.createElement("div");
+      wrap.className = "actions";
+
+      wrap.append(button("Salin Link", "secondary",
+        async () => {
+          try {
+            await navigator.clipboard.writeText(makeLink(g));
+            notify("Link disalin untuk " + g.name);
+          } catch {
+            notify("Gagal menyalin. Gunakan HTTPS.", true);
+          }
+        }));
+
+      wrap.append(button("WhatsApp", "success", () => {
+        const p = normalizePhone(g.phone);
+        if (!p || !validPhone(p)) {
+          notify("Nomor WhatsApp tidak valid: " + g.name, true);
+          return;
+        }
+        const url = "https://wa.me/" + p +
+          "?text=" + encodeURIComponent(whatsappMessage(g));
+        window.open(url, "_blank", "noopener,noreferrer");
+      }));
+
+      wrap.append(button("Edit", "secondary", () => {
+        editingId = g.id;
+        $("guestName").value = g.name;
+        $("guestPhone").value = g.phone || "";
+        $("guestQuota").value = g.quota;
+        $("saveGuestBtn").textContent = "Simpan Perubahan";
+        $("guestName").focus();
+      }));
+
+      wrap.append(button("Hapus", "danger", async () => {
+        if (!confirm("Hapus undangan untuk " + g.name +
+          "? Data RSVP terkait juga dapat terhapus.")) return;
+
+        const {error} = await db.from("guests")
+          .delete().eq("id", g.id);
+
+        if (error) notify(error.message, true);
+        else {
+          notify("Tamu berhasil dihapus.");
+          await loadData();
+        }
+      }));
+
+      actions.append(wrap);
+      row.append(actions);
+      body.append(row);
+    }
+  }
+
+  function resetGuestForm() {
+    editingId = null;
+    $("guestForm").reset();
+    $("guestQuota").value = 1;
+    $("saveGuestBtn").textContent = "Simpan Tamu";
+  }
+
+  $("loginForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    clearMessage();
+    const btn = e.submitter;
+    btn.disabled = true;
+
+    try {
+      const {error} = await db.auth.signInWithPassword({
+        email: $("email").value.trim(),
+        password: $("password").value
+      });
+      if (error) throw error;
+      $("password").value = "";
+      await showDashboard();
+    } catch (err) {
+      notify("Login gagal: " + err.message, true);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  $("logoutBtn").addEventListener("click", async () => {
+    await db.auth.signOut();
+    guests = [];
+    rsvps = [];
+    checkins = [];
+    $("dashboard").classList.add("hidden");
+    $("loginPanel").classList.remove("hidden");
+    notify("Anda sudah logout.");
+  });
+
+  $("guestForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const name = $("guestName").value.trim();
+    const phone = normalizePhone($("guestPhone").value);
+    const quota = Number($("guestQuota").value);
+
+    if (!name || name.length > 200 ||
+        !validPhone(phone) ||
+        !Number.isInteger(quota) ||
+        quota < 1 || quota > 20) {
+      notify("Periksa nama, nomor WhatsApp, dan kuota.", true);
+      return;
+    }
+
+    const duplicate = guests.find(g =>
+      g.id !== editingId &&
+      (g.name.trim().toLowerCase() === name.toLowerCase() ||
+       (phone && normalizePhone(g.phone) === phone)));
+
+    if (duplicate) {
+      notify("Nama atau nomor sudah terdaftar: " +
+        duplicate.name, true);
+      return;
+    }
+
+    const payload = {name, phone: phone || null, quota};
+    const query = editingId
+      ? db.from("guests").update(payload).eq("id", editingId)
+      : db.from("guests").insert(payload);
+
+    const {error} = await query;
+    if (error) {
+      notify(error.message, true);
+      return;
+    }
+
+    resetGuestForm();
+    notify("Data tamu berhasil disimpan.");
+    await loadData();
+  });
+
+  $("cancelEditBtn").addEventListener("click", resetGuestForm);
+  $("refreshBtn").addEventListener("click", loadData);
+  $("searchGuest").addEventListener("input", renderGuests);
+
+  // Parser CSV mendukung tanda kutip dan koma di dalam teks.
+  function parseCSV(text) {
+    text = text.replace(/^\uFEFF/, "");
+    const rows = [];
+    let row = [], field = "", quoted = false;
+
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+
+      if (ch === '"') {
+        if (quoted && text[i + 1] === '"') {
+          field += '"';
+          i++;
+        } else {
+          quoted = !quoted;
+        }
+      } else if (ch === "," && !quoted) {
+        row.push(field);
+        field = "";
+      } else if ((ch === "\n" || ch === "\r") && !quoted) {
+        if (ch === "\r" && text[i + 1] === "\n") i++;
+        row.push(field);
+        if (row.some(v => v.trim())) rows.push(row);
+        row = [];
+        field = "";
+      } else {
+        field += ch;
+      }
+    }
+
+    if (quoted) throw Error("CSV memiliki tanda kutip tidak lengkap.");
+    row.push(field);
+    if (row.some(v => v.trim())) rows.push(row);
+    return rows;
+  }
+
+  $("csvFile").addEventListener("change", async e => {
+    csvRows = [];
+    $("importBtn").disabled = true;
+    $("previewTable").classList.add("hidden");
+
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      const rows = parseCSV(await file.text());
+      if (rows.length < 2) throw Error("CSV kosong.");
+
+      const headers = rows.shift().map(h =>
+        h.trim().toLowerCase());
+      const ix = name => headers.indexOf(name);
+
+      if (ix("name") < 0 || ix("quota") < 0) {
+        throw Error("Kolom name dan quota wajib tersedia.");
+      }
+
+      const seenNames = new Set(
+        guests.map(g => g.name.trim().toLowerCase()));
+      const seenPhones = new Set(
+        guests.map(g => normalizePhone(g.phone)).filter(Boolean));
+
+      csvRows = rows.map((r, i) => {
+        const name = (r[ix("name")] || "").trim();
+        const phone = normalizePhone(
+          ix("phone") >= 0 ? r[ix("phone")] : "");
+        const quota = Number(r[ix("quota")]);
+        let status = "Valid";
+
+        if (!name || name.length > 200 ||
+            !validPhone(phone) ||
+            !Number.isInteger(quota) ||
+            quota < 1 || quota > 20) {
+          status = "Tidak valid";
+        } else if (
+          seenNames.has(name.toLowerCase()) ||
+          (phone && seenPhones.has(phone))
+        ) {
+          status = "Duplikat";
+        } else {
+          seenNames.add(name.toLowerCase());
+          if (phone) seenPhones.add(phone);
+        }
+
+        return {
+          line: i + 2, name, phone, quota, status
+        };
+      });
+
+      const valid = csvRows.filter(r => r.status === "Valid");
+      const invalid = csvRows.length - valid.length;
+
+      $("csvSummary").textContent =
+        `${csvRows.length} baris: ${valid.length} valid, ` +
+        `${invalid} dilewati.`;
+
+      const body = $("previewBody");
+      body.replaceChildren();
+
+      for (const r of csvRows.slice(0, 100)) {
+        const tr = document.createElement("tr");
+        tr.append(
+          td(r.line), td(r.name), td(r.phone || "-"),
+          td(r.quota), td(r.status)
+        );
+        body.append(tr);
+      }
+
+      $("previewTable").classList.remove("hidden");
+      $("importBtn").disabled = valid.length === 0;
+    } catch (err) {
+      notify("CSV gagal dibaca: " + err.message, true);
+    }
+  });
+
+  $("importBtn").addEventListener("click", async () => {
+    const valid = csvRows.filter(r => r.status === "Valid");
+    if (!valid.length) return;
+
+    if (!confirm(`Impor ${valid.length} tamu ke database?`)) return;
+
+    const btn = $("importBtn");
+    btn.disabled = true;
+
+    let inserted = 0, failed = 0;
+    const errors = [];
+
+    // Batch kecil agar mudah menangani kegagalan.
+    for (let i = 0; i < valid.length; i += 50) {
+      const batch = valid.slice(i, i + 50).map(r => ({
+        name: r.name,
+        phone: r.phone || null,
+        quota: r.quota
+      }));
+
+      const {error} = await db.from("guests").insert(batch);
+      if (error) {
+        failed += batch.length;
+        errors.push(`Baris ${i + 1}: ${error.message}`);
+      } else {
+        inserted += batch.length;
+      }
+    }
+
+    csvRows = [];
+    $("csvFile").value = "";
+    $("previewTable").classList.add("hidden");
+    $("csvSummary").textContent = "Impor selesai.";
+    await loadData();
+
+    notify(
+      `Berhasil: ${inserted} tamu. Gagal: ${failed}.` +
+      (errors.length ? "\n" + errors.join("\n") : ""),
+      failed > 0
+    );
+  });
+
+  $("downloadTemplateBtn").addEventListener("click", () => {
+    const csv =
+      "name,phone,quota,category\n" +
+      "Tamu Contoh A,6281234567890,2,Keluarga\n" +
+      "Tamu Contoh B,6281312345678,1,Teman\n";
+
+    const blob = new Blob(["\uFEFF" + csv], {
+      type: "text/csv;charset=utf-8"
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "template_tamu.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+
+  // TAMBAHAN: Moderasi ucapan; akses database tetap mengikuti RLS administrator.
+  async function loadWishesAdmin() {
+    const body = $("wishesAdminBody");
+    const status = $("wishesAdminStatus");
+    body.replaceChildren();
+    status.textContent = "Memuat ucapan...";
+    try {
+      const wishes = await fetchAll("wishes", "id,sender_name,message,approved,created_at");
+      wishes.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      const pending = wishes.filter(w => w.approved !== true).length;
+      status.textContent = `${wishes.length} ucapan; ${pending} menunggu persetujuan.`;
+      if (!wishes.length) {
+        const row = document.createElement("tr");
+        const cell = td("Belum ada ucapan.");
+        cell.colSpan = 5;
+        row.append(cell);
+        body.append(row);
+      }
+      for (const wish of wishes) {
+        const row = document.createElement("tr");
+        const actionCell = document.createElement("td");
+        const actionWrap = document.createElement("div");
+        actionWrap.className = "actions";
+        const approve = button("Setujui", "success", () => setWishApproval(wish.id, true));
+        const hide = button("Sembunyikan", "secondary", () => setWishApproval(wish.id, false));
+        const remove = button("Hapus", "danger", () => deleteWishAdmin(wish.id, wish.sender_name));
+        approve.disabled = wish.approved === true;
+        hide.disabled = wish.approved !== true;
+        actionWrap.append(approve, hide, remove);
+        actionCell.append(actionWrap);
+        row.append(
+          td(wish.sender_name || "-"),
+          td(wish.message || "-"),
+          td(wish.approved === true ? "Disetujui" : "Menunggu"),
+          td(wish.created_at ? new Date(wish.created_at).toLocaleString("id-ID") : "-"),
+          actionCell
+        );
+        body.append(row);
+      }
+    } catch (err) {
+      status.textContent = "Gagal memuat ucapan: " + err.message;
+    }
+  }
+
+  async function setWishApproval(id, approved) {
+    const status = $("wishesAdminStatus");
+    try {
+      status.textContent = "Menyimpan perubahan...";
+      const {data, error} = await db.from("wishes")
+        .update({approved}).eq("id", id).select("id");
+      if (error) throw error;
+      if (!data || data.length !== 1) throw Error("Ucapan tidak ditemukan atau akses ditolak.");
+      await loadWishesAdmin();
+    } catch (err) {
+      status.textContent = "Gagal memperbarui ucapan: " + err.message;
+    }
+  }
+
+  async function deleteWishAdmin(id, senderName) {
+    if (!confirm(`Hapus ucapan dari ${senderName || "pengirim"} secara permanen?`)) return;
+    const status = $("wishesAdminStatus");
+    try {
+      status.textContent = "Menghapus ucapan...";
+      const {data, error} = await db.from("wishes")
+        .delete().eq("id", id).select("id");
+      if (error) throw error;
+      if (!data || data.length !== 1) throw Error("Ucapan tidak ditemukan atau akses ditolak.");
+      await loadWishesAdmin();
+    } catch (err) {
+      status.textContent = "Gagal menghapus ucapan: " + err.message;
+    }
+  }
+
+  $("refreshWishesBtn").addEventListener("click", loadWishesAdmin);
+
+
+  // PENGEMBANGAN: Manajemen RSVP, laporan CSV, dan check-in.
+  // Seluruh data memakai tabel dan sesi admin Supabase yang sudah ada.
+  function rsvpFor(g) { return rsvps.find(r => r.guest_id === g.id); }
+  function checkinFor(g) { return checkins.find(c => c.guest_id === g.id); }
+  function rsvpLabel(r) {
+    if (!r) return "Belum RSVP";
+    if (r.status === "hadir") return "Hadir";
+    if (r.status === "tidak_hadir") return "Tidak hadir";
+    return r.status || "Belum RSVP";
+  }
+  function renderRsvpManagement() {
+    const query = $("rsvpSearch").value.trim().toLowerCase();
+    const filter = $("rsvpFilter").value;
+    const list = guests.filter(g => {
+      const r = rsvpFor(g);
+      const match = g.name.toLowerCase().includes(query) ||
+        (g.phone || "").includes(query);
+      const matchFilter = filter === "all" ||
+        (filter === "pending" ? !r : r?.status === filter);
+      return match && matchFilter;
+    });
+    $("rsvpSummary").textContent = `${list.length} dari ${guests.length} tamu ditampilkan; ` +
+      `${rsvps.filter(r => r.status === "hadir").length} undangan RSVP hadir.`;
+    const body = $("rsvpBody");
+    body.replaceChildren();
+    for (const g of list) {
+      const r = rsvpFor(g), c = checkinFor(g);
+      const tr = document.createElement("tr");
+      tr.append(td(g.name), td(g.phone || "-"), td(g.quota),
+        td(rsvpLabel(r)), td(r?.guest_count ?? "-"),
+        td(c?.actual_count ?? 0));
+      body.append(tr);
+    }
+    if (!list.length) {
+      const tr = document.createElement("tr"), cell = td("Tidak ada data sesuai filter.");
+      cell.colSpan = 6; tr.append(cell); body.append(tr);
+    }
+  }
+  function renderCheckinManagement() {
+    const q = $("checkinSearch").value.trim().toLowerCase();
+    const list = guests.filter(g => g.name.toLowerCase().includes(q) ||
+      (g.phone || "").includes(q) ||
+      (g.invitation_token || "").toLowerCase().includes(q));
+    const select = $("checkinGuest");
+    const previous = select.value;
+    select.replaceChildren();
+    const blank = document.createElement("option");
+    blank.value = ""; blank.textContent = "Pilih tamu..."; select.append(blank);
+    for (const g of list.slice(0, 200)) {
+      const opt = document.createElement("option");
+      opt.value = g.id;
+      opt.textContent = `${g.name} (kuota ${g.quota})`;
+      select.append(opt);
+    }
+    if (list.some(g => g.id === previous)) select.value = previous;
+    const body = $("checkinBody"); body.replaceChildren();
+    for (const g of list.slice(0, 200)) {
+      const tr = document.createElement("tr");
+      const actions = document.createElement("td");
+      actions.append(button("Pilih / Ubah", "secondary", () => {
+        select.value = g.id;
+        $("checkinCount").value = checkinFor(g)?.actual_count ?? rsvpFor(g)?.guest_count ?? 1;
+        $("checkinStatus").textContent = `Tamu terpilih: ${g.name}. Jumlah saat ini: ${checkinFor(g)?.actual_count ?? 0}; kuota: ${g.quota}. Atur jumlah lalu tekan Simpan Check-in.`;
+        $("checkinCount").focus();
+      }));
+      tr.append(td(g.name), td(g.quota), td(rsvpLabel(rsvpFor(g))),
+        td(checkinFor(g)?.actual_count ?? 0), actions);
+      body.append(tr);
+    }
+    if (list.length > 200) {
+      $("checkinStatus").textContent = "Hasil dibatasi 200 tamu; ketik nama untuk mempersempit pencarian.";
+    }
+  }
+  async function saveCheckinManagement() {
+    const guest = guests.find(g => g.id === $("checkinGuest").value);
+    const count = Number($("checkinCount").value);
+    if (!guest) { $("checkinStatus").textContent = "Pilih tamu terlebih dahulu."; return; }
+    if (!Number.isInteger(count) || count < 0 || count > Number(guest.quota)) {
+      $("checkinStatus").textContent = `Jumlah harus 0 sampai kuota ${guest.quota}.`;
+      return;
+    }
+    const btn = $("saveCheckinBtn"); btn.disabled = true;
+    try {
+      const existing = checkinFor(guest);
+      if (existing && Number(existing.actual_count) > 0 && count !== Number(existing.actual_count)) {
+        if (!confirm(`Ubah check-in ${guest.name} dari ${existing.actual_count} menjadi ${count} orang?`)) return;
+      }
+      const query = existing
+        ? db.from("checkins").update({actual_count: count}).eq("guest_id", guest.id)
+        : db.from("checkins").insert({guest_id: guest.id, actual_count: count});
+      const {data, error} = await query.select("guest_id");
+      if (error) throw error;
+      if (!data || data.length !== 1) throw Error("Data tidak berubah; periksa izin admin Supabase.");
+      await loadData();
+      $("checkinStatus").textContent = `Check-in ${guest.name}: ${count} orang tersimpan.`;
+    } catch (err) {
+      $("checkinStatus").textContent = "Gagal menyimpan: " + err.message;
+    } finally { btn.disabled = false; }
+  }
+  function csvCell(value) {
+    const text = String(value ?? "");
+    // Hindari formula injection saat CSV dibuka di spreadsheet.
+    const safe = /^[=+@\-\t\r]/.test(text) ? "'" + text : text;
+    return '"' + safe.replace(/"/g, '""') + '"';
+  }
+  function exportGuestReport(kind) {
+    const checkinOnly = kind === "checkin";
+    const headers = ["nama", "whatsapp", "kuota", "status_rsvp", "jumlah_rsvp", "jumlah_checkin"];
+    const rows = guests.map(g => {
+      const r = rsvpFor(g), c = checkinFor(g);
+      return [g.name, g.phone || "", g.quota, rsvpLabel(r), r?.guest_count ?? "", c?.actual_count ?? 0];
+    });
+    const csv = [headers, ...rows].map(row => row.map(csvCell).join(",")).join("\r\n");
+    const blob = new Blob(["\uFEFF" + csv], {type: "text/csv;charset=utf-8"});
+    const url = URL.createObjectURL(blob), a = document.createElement("a");
+    a.href = url;
+    a.download = checkinOnly ? "laporan_checkin_danni_riska.csv" : "laporan_rsvp_danni_riska.csv";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  $("rsvpSearch").addEventListener("input", renderRsvpManagement);
+  $("rsvpFilter").addEventListener("change", renderRsvpManagement);
+  $("refreshRsvpBtn").addEventListener("click", loadData);
+  $("exportRsvpBtn").addEventListener("click", () => exportGuestReport("rsvp"));
+  $("checkinSearch").addEventListener("input", renderCheckinManagement);
+  $("checkinGuest").addEventListener("change", () => {
+    const g = guests.find(x => x.id === $("checkinGuest").value);
+    if (g) $("checkinCount").value = checkinFor(g)?.actual_count ?? rsvpFor(g)?.guest_count ?? 1;
+  });
+  $("saveCheckinBtn").addEventListener("click", saveCheckinManagement);
+  $("exportCheckinBtn").addEventListener("click", () => exportGuestReport("checkin"));
+
+
+  // MODUL QR CHECK-IN: hanya tambahan, memakai tabel guests/checkins yang sudah ada.
+  // Isi QR berupa token acak yang telah dimiliki tamu, bukan data pribadi.
+  let qrSelectedGuestId = null;
+  let qrScanner = null;
+  let qrBusy = false;
+  let qrGeneratedGuest = null;
+
+  function qrSetStatus(message, error = false) {
+    const el = $("qrStatus");
+    el.textContent = message;
+    el.className = "notice " + (error ? "error" : "");
+  }
+
+  function qrExtractToken(raw) {
+    const value = String(raw || "").trim();
+    if (!value) return "";
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)) return value.toLowerCase();
+    try {
+      const url = new URL(value);
+      if (url.protocol !== "https:" || url.origin !== new URL(INVITATION_URL).origin ||
+          url.pathname !== new URL(INVITATION_URL).pathname) return "";
+      const token = url.searchParams.get("invite") || "";
+      return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(token) ? token.toLowerCase() : "";
+    } catch { return ""; }
+  }
+
+  function qrUpdateGuestList() {
+    const q = $("qrGuestSearch").value.trim().toLowerCase();
+    const select = $("qrGuestSelect");
+    const prev = select.value;
+    select.replaceChildren();
+    const blank = document.createElement("option");
+    blank.value = ""; blank.textContent = "Pilih tamu..."; select.append(blank);
+    const found = guests.filter(g => g.name.toLowerCase().includes(q) || (g.phone || "").includes(q));
+    for (const guest of found.slice(0, 200)) {
+      const option = document.createElement("option");
+      option.value = guest.id;
+      option.textContent = guest.name + " (kuota " + guest.quota + ")";
+      select.append(option);
+    }
+    if (found.some(g => g.id === prev)) select.value = prev;
+  }
+
+  function qrLoadScript(url, globalName) {
+    if (window[globalName]) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = url;
+      script.onload = () => window[globalName] ? resolve() : reject(Error("Library QR tidak tersedia."));
+      script.onerror = () => reject(Error("Gagal mengunduh library QR. Periksa koneksi internet."));
+      document.head.append(script);
+    });
+  }
+
+  async function qrShowGuest() {
+    const guest = guests.find(g => g.id === $("qrGuestSelect").value);
+    if (!guest?.invitation_token) { qrSetStatus("Pilih tamu yang memiliki token undangan.", true); return; }
+    try {
+      // Encoder QR ditanam langsung di HTML; tidak perlu mengunduh library dari CDN.
+      const target = $("qrImage");
+      target.replaceChildren();
+      const canvas = document.createElement("canvas");
+      const qr = new window.WeddingQRMatrix(0, 0); // 0 = error correction M
+      qr.addData(makeLink(guest));
+      qr.make();
+      const cells = qr.getModuleCount();
+      const quiet = 4, scale = Math.max(4, Math.floor(288 / (cells + quiet * 2)));
+      canvas.width = canvas.height = (cells + quiet * 2) * scale;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#000000";
+      for (let y = 0; y < cells; y++) for (let x = 0; x < cells; x++) {
+        if (qr.isDark(y, x)) ctx.fillRect((x + quiet) * scale, (y + quiet) * scale, scale, scale);
+      }
+      target.append(canvas);
+      $("qrGuestCaption").textContent = guest.name + " — kuota " + guest.quota;
+      $("qrImageBox").classList.remove("hidden");
+      $("qrDownloadBtn").disabled = false;
+      qrGeneratedGuest = guest;
+      qrSetStatus("QR untuk " + guest.name + " siap. Kode berisi tautan undangan personal; bagikan hanya kepada tamu terkait.");
+    } catch (err) { qrSetStatus("Gagal membuat QR: " + err.message, true); }
+  }
+
+  async function qrStopScanner() {
+    $("qrStartScanBtn").disabled = false;
+    $("qrStopScanBtn").disabled = true;
+    if (qrScanner) {
+      try { await qrScanner.stop(); } catch (_) {}
+      try { qrScanner.clear(); } catch (_) {}
+      qrScanner = null;
+    }
+    $("qrCameraBox").classList.add("hidden");
+  }
+
+  async function qrStartScanner() {
+    if (qrScanner) return;
+    if (!window.isSecureContext) { qrSetStatus("Kamera membutuhkan HTTPS. Buka dashboard melalui GitHub Pages.", true); return; }
+    $("qrStartScanBtn").disabled = true;
+    $("qrCameraBox").classList.remove("hidden");
+    qrSetStatus("Menyiapkan kamera. Izinkan akses kamera jika diminta.");
+    try {
+      // Coba dua penyedia CDN untuk scanner; generator QR tidak memakai CDN.
+      if (!window.Html5Qrcode) {
+        try { await qrLoadScript("https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js", "Html5Qrcode"); }
+        catch (_) { await qrLoadScript("https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js", "Html5Qrcode"); }
+      }
+      qrScanner = new window.Html5Qrcode("qrReader");
+      await qrScanner.start({facingMode:"environment"}, {fps:10, qrbox:{width:240,height:240}}, async value => {
+        if (qrBusy) return;
+        qrBusy = true;
+        $("qrInput").value = value;
+        await qrStopScanner();
+        await qrVerify();
+        qrBusy = false;
+      }, () => {});
+      $("qrStopScanBtn").disabled = false;
+    } catch (err) {
+      await qrStopScanner();
+      qrSetStatus("Kamera tidak dapat dibuka: " + err.message + ". Anda tetap dapat menempel tautan undangan di kolom Periksa QR.", true);
+    }
+  }
+
+  async function qrVerify() {
+    qrSelectedGuestId = null;
+    $("qrConfirmBox").classList.add("hidden");
+    const token = qrExtractToken($("qrInput").value);
+    if (!token) { qrSetStatus("QR tidak valid atau bukan tautan undangan Danni & Riska.", true); return; }
+    // Ambil data terbaru agar hasil scan tidak mengandalkan cache dashboard.
+    try {
+      const {data: guest, error} = await db.from("guests")
+        .select("id,name,quota,invitation_token").eq("invitation_token", token).maybeSingle();
+      if (error) throw error;
+      if (!guest) { qrSetStatus("Tamu tidak ditemukan. Periksa QR yang dipindai.", true); return; }
+      const {data: existing, error: checkErr} = await db.from("checkins")
+        .select("guest_id,actual_count").eq("guest_id", guest.id).limit(1);
+      if (checkErr) throw checkErr;
+      if (existing?.length && Number(existing[0].actual_count) > 0) {
+        qrSetStatus("SUDAH CHECK-IN: " + guest.name + " (" + existing[0].actual_count + " orang). QR tidak boleh dipakai untuk check-in ulang.", true);
+        return;
+      }
+      qrSelectedGuestId = guest.id;
+      $("qrConfirmName").textContent = guest.name;
+      $("qrConfirmDetails").textContent = "Kuota undangan: " + guest.quota + " orang. Periksa identitas sebelum mengonfirmasi.";
+      $("qrArrivalCount").max = guest.quota;
+      $("qrArrivalCount").value = 1;
+      $("qrConfirmBox").classList.remove("hidden");
+      qrSetStatus("QR valid. Silakan tentukan jumlah yang datang dan konfirmasi.");
+    } catch (err) { qrSetStatus("Gagal memeriksa QR: " + err.message, true); }
+  }
+
+  async function qrConfirmCheckin() {
+    const id = qrSelectedGuestId;
+    if (!id) return;
+    const count = Number($("qrArrivalCount").value);
+    const btn = $("qrConfirmBtn");
+    btn.disabled = true;
+    try {
+      const {data: guest, error: guestErr} = await db.from("guests")
+        .select("id,name,quota").eq("id", id).single();
+      if (guestErr) throw guestErr;
+      if (!Number.isInteger(count) || count < 1 || count > Number(guest.quota)) {
+        throw Error("Jumlah kedatangan harus 1 sampai " + guest.quota + ".");
+      }
+      const {data: existing, error: existingErr} = await db.from("checkins")
+        .select("guest_id,actual_count").eq("guest_id", id).limit(1);
+      if (existingErr) throw existingErr;
+      if (existing?.some(x => Number(x.actual_count) > 0)) throw Error("Tamu sudah check-in. Tidak boleh mencatat ulang.");
+      const query = existing?.length
+        ? db.from("checkins").update({actual_count:count}).eq("guest_id", id).eq("actual_count", 0)
+        : db.from("checkins").insert({guest_id:id,actual_count:count});
+      const {data, error} = await query.select("guest_id");
+      if (error) throw error;
+      if (!data || data.length !== 1) throw Error("Data tidak tersimpan. Mungkin sudah check-in dari perangkat lain; refresh lalu periksa.");
+      qrSelectedGuestId = null;
+      $("qrConfirmBox").classList.add("hidden");
+      qrSetStatus("Berhasil check-in: " + guest.name + " — " + count + " orang.");
+      await loadData();
+    } catch (err) { qrSetStatus("Gagal check-in: " + err.message, true); }
+    finally { btn.disabled = false; }
+  }
+
+  $("qrGuestSearch").addEventListener("input", qrUpdateGuestList);
+  $("qrGuestSelect").addEventListener("change", () => {
+    qrGeneratedGuest = null;
+    $("qrDownloadBtn").disabled = true;
+    $("qrImageBox").classList.add("hidden");
+  });
+  $("qrShowBtn").addEventListener("click", qrShowGuest);
+  $("qrDownloadBtn").addEventListener("click", () => {
+    if (!qrGeneratedGuest) return;
+    const canvas = $("qrImage").querySelector("canvas");
+    if (!canvas) return;
+    const a = document.createElement("a");
+    a.href = canvas.toDataURL("image/png");
+    a.download = "QR-undangan-" + qrGeneratedGuest.name.replace(/[^a-z0-9_-]/gi,"_").slice(0,60) + ".png";
+    a.click();
+  });
+  $("qrStartScanBtn").addEventListener("click", qrStartScanner);
+  $("qrStopScanBtn").addEventListener("click", qrStopScanner);
+  $("qrVerifyBtn").addEventListener("click", qrVerify);
+  $("qrConfirmBtn").addEventListener("click", qrConfirmCheckin);
+  $("qrReloadBtn").addEventListener("click", async () => { await loadData(); qrUpdateGuestList(); qrSetStatus("Data tamu diperbarui."); });
+
+  async function initialize() {
+    if (!configured) {
+      notify(
+        "Isi SUPABASE_KEY dengan Publishable Key dari Notes, " +
+        "lalu simpan file admin.html.",
+        true
+      );
+      return;
+    }
+
+    try {
+      db = createClient(SUPABASE_URL, SUPABASE_KEY);
+      await showDashboard();
+    } catch (err) {
+      notify("Gagal menghubungkan Supabase: " +
+        err.message, true);
+    }
+  }
+
+  initialize();
+</script>
+</body>
+</html>
